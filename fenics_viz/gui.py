@@ -57,29 +57,31 @@ class VertexObj(bpy.types.PropertyGroup):
     def get_list_with_idx(self):
         return [self.idx,self.x,self.y,self.z]
 
-class FaceObj(bpy.types.PropertyGroup):
+class TetObj(bpy.types.PropertyGroup):
     idx = IntProperty( default = 0 )
-    i = IntProperty( default = 0 )
-    j = IntProperty( default = 0 )
-    k = IntProperty( default = 0 )
+    v0 = IntProperty( default = 0 )
+    v1 = IntProperty( default = 0 )
+    v2 = IntProperty( default = 0 )
+    v3 = IntProperty( default = 0 )
 
     def set_from_list_with_idx(self, arr):
         self.idx = arr[0]
-        self.i = arr[1]
-        self.j = arr[2]
-        self.k = arr[3]
+        self.v0 = arr[1]
+        self.v1 = arr[2]
+        self.v2 = arr[3]
+        self.v3 = arr[4]
 
     def get_list(self):
-        return [self.i,self.j,self.k]
+        return [self.v0,self.v1,self.v2,self.v3]
 
     def get_list_with_idx(self):
-        return [self.idx,self.i,self.j,self.k]
+        return [self.idx,self.v0,self.v1,self.v2,self.v3]
 
 # Class to hold the object
 class MeshObject(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     vert_list = CollectionProperty(type=VertexObj, name = "Vertex list")
-    face_list = CollectionProperty(type=FaceObj, name = "Face list")
+    tet_list = CollectionProperty(type=TetObj, name = "Tet list")
 
     # Draw in list of objects
     def draw_item_in_row ( self, row ):
@@ -135,13 +137,13 @@ class ImportMesh(bpy.types.Operator, ImportHelper):
             filename = os.path.basename(self.filepath)[:-4]
 
             # Import
-            vert_list, face_list = import_xml_mesh.import_xml_mesh(self.filepath)
+            vert_list, tet_list = import_xml_mesh.import_xml_mesh(self.filepath)
 
             # Make the objects
-            make_mesh_object.make_mesh_object_with_idxs(filename, vert_list, face_list)
+            make_mesh_object.make_mesh_object_with_idxs(filename, vert_list, tet_list)
 
             # Add to the list
-            context.scene.fviz.add_mesh_object(filename, vert_list, face_list)
+            context.scene.fviz.add_mesh_object(filename, vert_list, tet_list)
 
         return {'FINISHED'}
 
@@ -187,7 +189,7 @@ class FVizPropGroup(bpy.types.PropertyGroup):
 
 
     # Add a mesh object to the list
-    def add_mesh_object(self, name, vert_list, face_list):
+    def add_mesh_object(self, name, vert_list, tet_list):
         print("Adding mesh object to the list")
 
         # Check by name if the object already is in the list
@@ -198,19 +200,19 @@ class FVizPropGroup(bpy.types.PropertyGroup):
             idx = current_object_names.index(name)
             obj = self.mesh_obj_list[idx]
 
-            # Clear vert list, face list
+            # Clear vert list, tet list
             while len(obj.vert_list) > 0:
                 obj.vert_list.remove ( 0 )
-            while len(obj.face_list) > 0:
-                obj.face_list.remove ( 0 )
+            while len(obj.tet_list) > 0:
+                obj.tet_list.remove ( 0 )
 
         obj.name = name
         for i in range(0,len(vert_list)):
             obj.vert_list.add()
             obj.vert_list[i].set_from_list_with_idx(vert_list[i])
-        for i in range(0,len(face_list)):
-            obj.face_list.add()
-            obj.face_list[i].set_from_list_with_idx(face_list[i])
+        for i in range(0,len(tet_list)):
+            obj.tet_list.add()
+            obj.tet_list[i].set_from_list_with_idx(tet_list[i])
 
     # Remove a mesh object
     def remove_mesh_object(self):

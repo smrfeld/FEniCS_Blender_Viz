@@ -6,7 +6,7 @@ def import_xml_mesh(fname):
     f = open(fname, "r")
 
     vert_list = []
-    face_list = []
+    tet_list = []
 
     for line in f:
         s = line.split()
@@ -21,10 +21,10 @@ def import_xml_mesh(fname):
             # Elements; find quotes
             starts = [match.start() for match in re.finditer(re.escape("\""), line)]
             idx = int(line[starts[0]+1:starts[1]])
-            verts = [int(line[starts[2*i]+1:starts[2*i+1]]) for i in range(1,4)]
-            face_list.append([idx] + verts)
+            verts = [int(line[starts[2*i]+1:starts[2*i+1]]) for i in range(1,5)]
+            tet_list.append([idx] + verts)
 
     # Close
     f.close()
 
-    return [vert_list, face_list]
+    return [vert_list, tet_list]
