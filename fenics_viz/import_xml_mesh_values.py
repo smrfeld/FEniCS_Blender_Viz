@@ -18,8 +18,8 @@ def import_xml_mesh_values(fname):
             cell = int(line[starts[4]+1:starts[5]])
             vert = int(line[starts[6]+1:starts[7]])
 
-            if abs(value) > eps:
-                vals.append((cell,vert,value))
+            # if abs(value) > eps:
+            vals.append((cell,vert,value))
 
     # Close
     f.close()

@@ -13,6 +13,7 @@ from . import make_mesh_object
 from . import make_subdivided_triangles
 from . import import_xml_mesh_values
 from . import make_materials_for_subdivided_mesh
+from . import color_subdivided_mesh
 
 # Register
 def register():
@@ -185,7 +186,32 @@ class VisualizeTimepoint(bpy.types.Operator, ImportHelper):
             # Import
             vals = import_xml_mesh_values.import_xml_mesh_values(self.filepath)
 
-            # ... Update the materials...
+            # Current object
+            f = context.scene.fviz
+            obj = f.mesh_obj_list[f.active_object_index]
+
+            # Convert vals to verts
+            vert_vals = []
+            for val in vals:
+                tet = obj.tet_list[val[0]]
+                if val[1] == 0:
+                    vert_vals.append([tet.v0,val[2]])
+                elif val[1] == 1:
+                    vert_vals.append([tet.v1,val[2]])
+                elif val[1] == 2:
+                    vert_vals.append([tet.v2,val[2]])
+                else:
+                    vert_vals.append([tet.v3,val[2]])
+
+            # Sort by vertex
+            vert_vals.sort(key=lambda x: x[0])
+            vert_vals = [x[1] for x in vert_vals]
+            min_val = min(vert_vals)
+            max_val = max(vert_vals)
+
+            # Update the colors on the materials
+            obj = bpy.data.objects["sub"]
+            color_subdivided_mesh.color_subdivided_mesh(context, obj, vert_vals, min_val, max_val)
 
         return {'FINISHED'}
 

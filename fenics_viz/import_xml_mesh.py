@@ -58,7 +58,7 @@ def import_xml_mesh(fname):
             points = [float(line[starts[2*i]+1:starts[2*i+1]]) for i in range(1,4)]
             vert_list.append([idx] + points)
 
-        if len(s) > 0 and s[0] == "<triangle":
+        if len(s) > 0 and s[0] == "<tetrahedron":
             # Elements; find quotes
             starts = [match.start() for match in re.finditer(re.escape("\""), line)]
             idx = int(line[starts[0]+1:starts[1]])
