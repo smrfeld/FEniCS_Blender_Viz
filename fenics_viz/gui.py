@@ -189,9 +189,11 @@ class VisualizeTimepoint(bpy.types.Operator, ImportHelper):
 
             # Sort by vertex
             vert_vals.sort(key=lambda x: x[0])
+
             vert_vals = [x[1] for x in vert_vals]
-            min_val = min(vert_vals)
-            max_val = max(vert_vals)
+
+            min_val = 0.0 #min(vert_vals)
+            max_val = 0.1 #max(vert_vals)
 
             # Update the colors on the materials
             obj = bpy.data.objects["sub"]

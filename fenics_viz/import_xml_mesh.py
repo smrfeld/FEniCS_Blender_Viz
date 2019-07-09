@@ -62,7 +62,7 @@ def import_xml_mesh(fname):
             # Elements; find quotes
             starts = [match.start() for match in re.finditer(re.escape("\""), line)]
             idx = int(line[starts[0]+1:starts[1]])
-            verts = [int(line[starts[2*i]+1:starts[2*i+1]]) for i in range(1,5)]
+            verts = sorted([int(line[starts[2*i]+1:starts[2*i+1]]) for i in range(1,5)])
             tet_list.append([idx] + verts)
 
     # Close
