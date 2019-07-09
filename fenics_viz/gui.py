@@ -63,22 +63,6 @@ class VertexObj(bpy.types.PropertyGroup):
     def get_list_with_idx(self):
         return [self.idx,self.xval,self.yval,self.zval]
 
-class EdgeObj(bpy.types.PropertyGroup):
-    idx = IntProperty( default = 0, name="idx" )
-    v0 = IntProperty( default = 0, name="v0" )
-    v1 = IntProperty( default = 0, name="v1" )
-
-    def set_from_list_with_idx(self, arr):
-        self.idx = arr[0]
-        self.v0 = arr[1]
-        self.v1 = arr[2]
-
-    def get_list(self):
-        return [self.v0,self.v1]
-
-    def get_list_with_idx(self):
-        return [self.idx,self.v0,self.v1]
-
 class FaceObj(bpy.types.PropertyGroup):
     idx = IntProperty( default = 0, name="idx" )
     v0 = IntProperty( default = 0, name="v0" )
@@ -223,7 +207,6 @@ class VisualizeTimepoint(bpy.types.Operator, ImportHelper):
 class MeshObject(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     vert_list = CollectionProperty(type=VertexObj, name = "Vertex list")
-    edge_list = CollectionProperty(type=EdgeObj, name = "Edge list")
     face_list = CollectionProperty(type=FaceObj, name = "face list")
     tet_list = CollectionProperty(type=TetObj, name = "Tet list")
 
@@ -287,7 +270,7 @@ class ImportMesh(bpy.types.Operator, ImportHelper):
             make_mesh_object.make_mesh_object_with_idxs(filename, vert_list, edge_list, face_list)
 
             # Add to the list
-            context.scene.fviz.add_mesh_object(filename, vert_list, edge_list, face_list, tet_list)
+            context.scene.fviz.add_mesh_object(filename, vert_list, face_list, tet_list)
 
         return {'FINISHED'}
 
@@ -341,7 +324,7 @@ class FVizPropGroup(bpy.types.PropertyGroup):
 
 
     # Add a mesh object to the list
-    def add_mesh_object(self, name, vert_list, edge_list, face_list, tet_list):
+    def add_mesh_object(self, name, vert_list, face_list, tet_list):
         print("Adding mesh object to the list")
 
         # Check by name if the object already is in the list
@@ -355,8 +338,6 @@ class FVizPropGroup(bpy.types.PropertyGroup):
             # Clear vert list, tet list
             while len(obj.vert_list) > 0:
                 obj.vert_list.remove ( 0 )
-            while len(obj.edge_list) > 0:
-                obj.edge_list.remove ( 0 )
             while len(obj.face_list) > 0:
                 obj.face_list.remove ( 0 )
             while len(obj.tet_list) > 0:
@@ -366,9 +347,6 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         for i in range(0,len(vert_list)):
             obj.vert_list.add()
             obj.vert_list[i].set_from_list_with_idx(vert_list[i])
-        for i in range(0,len(edge_list)):
-            obj.edge_list.add()
-            obj.edge_list[i].set_from_list_with_idx(edge_list[i])
         for i in range(0,len(face_list)):
             obj.face_list.add()
             obj.face_list[i].set_from_list_with_idx(face_list[i])
