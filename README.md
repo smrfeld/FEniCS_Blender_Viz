@@ -1,4 +1,4 @@
-# Visualize XML output from DOLFIN/FenICS in Blender
+# Visualize XML output from DOLFIN/FEniCS in Blender
 
 Unofficial! At your own risk.
 

@@ -25,10 +25,10 @@ def unregister():
 
 # Main panel class
 class FVizVizPanel(bpy.types.Panel):
-    bl_label = "DOLFIN/FenICS XML viz" # Panel name
+    bl_label = "DOLFIN/FEniCS XML viz" # Panel name
     bl_space_type = "VIEW_3D" # where to put panel
     bl_region_type = "TOOLS" # sub location
-    bl_category = "DOLFIN/FenICS XML viz"
+    bl_category = "DOLFIN/FEniCS XML viz"
 
     @classmethod
     def poll(cls, context):
@@ -316,7 +316,7 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         row.alignment = 'LEFT'
 
         row = box.row()
-        row.label("Visualize DOLFIN/FenICS XML", icon='SURFACE_DATA')
+        row.label("Visualize DOLFIN/FEniCS XML", icon='SURFACE_DATA')
 
         row = box.row()
         col = row.column()
