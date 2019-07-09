@@ -14,6 +14,7 @@ from . import make_subdivided_triangles
 from . import import_xml_mesh_values
 from . import make_materials_for_subdivided_mesh
 from . import color_subdivided_mesh
+from . import import_tetgen
 
 # Register
 def register():
@@ -251,28 +252,78 @@ class ImportMesh(bpy.types.Operator, ImportHelper):
     bl_label = "Import mesh"
 
     filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
-
     filename_ext = ".xml" # allowed extensions
 
     # Get the filename
     def execute(self, context):
 
         # store
-        if self.filepath[-4:] != self.filename_ext:
-            raise SystemError("Must be: " + str(self.filename_ext) + " format but you chose: " + str(self.filepath[-4:]) + "!")
+        if self.properties.filepath[-4:] != self.filename_ext:
+            raise SystemError("Must be: " + str(self.filename_ext) + " format but you chose: " + str(self.properties.filepath[-4:]) + "!")
         else:
 
             # Filename
-            filename = os.path.basename(self.filepath)[:-4]
+            filename = os.path.basename(self.properties.filepath)[:-4]
 
             # Import
-            vert_list, edge_list, face_list, tet_list = import_xml_mesh.import_xml_mesh(self.filepath)
+            vert_list, edge_list, face_list, tet_list = import_xml_mesh.import_xml_mesh(self.properties.filepath)
 
             # Make the objects
             make_mesh_object.make_mesh_object_with_idxs(filename, vert_list, edge_list, face_list)
 
             # Add to the list
             context.scene.fviz.add_mesh_object(filename, vert_list, face_list, tet_list)
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+
+class ImportTetGenVoronoi(bpy.types.Operator, ImportHelper):
+    bl_idname = "fviz.import_tetgen_voronoi"
+    bl_label = "Import Voronoi from TetGen"
+
+    files = CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
+    directory = StringProperty(subtype='DIR_PATH')
+
+    # Get the filename
+    def execute(self, context):
+
+        extensions_required = [".node", ".edge", ".face", ".cell"]
+
+        if len(self.files) != 4:
+            raise SystemError("Must select 4 files: " + str(extensions_required))
+
+        fname_nodes = None
+        fname_edges = None
+        fname_faces = None
+        fname_cells = None
+        for filename in self.files:
+            full_name = os.path.join(self.directory, filename.name)
+            _, extension = os.path.splitext(full_name)
+            if not extension in extensions_required:
+                raise SystemError("Allowed extensions are: " + str(extensions_required) + " but chosen is: " + str(extension))
+
+            if extension == ".node":
+                fname_nodes = full_name
+            elif extension == ".edge":
+                fname_edges = full_name
+            elif extension == ".face":
+                fname_faces = full_name
+            elif extension == ".cell":
+                fname_cells = full_name
+
+        # Check all extensions are present
+        if fname_nodes == None or fname_edges == None or fname_faces == None or fname_cells == None:
+            raise SystemError("Missing files! Required are: " + str(extensions_required) + " but got: " + str(fname_nodes) + " " + str(fname_edges) + " " + str(fname_faces) + " " + str(fname_cells))
+
+        # Import
+        point_list, edge_list, face_list, cell_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells)
+
+        # Make object
+        make_mesh_object.make_mesh_object_with_idxs("voronoi", point_list, edge_list, face_list)
 
         return {'FINISHED'}
 
@@ -315,6 +366,10 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         col.operator("fviz.import_mesh", icon='ZOOMIN', text="")
         col.operator("fviz.mesh_object_remove", icon='ZOOMOUT', text="")
         col.operator("fviz.mesh_object_remove_all", icon='X', text="")
+
+        row = box.row()
+        row.label("Import TetGen Voronoi")
+        row.operator("fviz.import_tetgen_voronoi")
 
         row = box.row()
         row.label("Subdivide faces")
