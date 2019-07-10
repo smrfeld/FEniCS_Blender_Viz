@@ -1,6 +1,69 @@
 
 from . import circumcenter_sphere
 
+def get_edges_connected_to_vert(i_vert, edge_list):
+
+    edges_connected_to_vert = []
+    for i_edge in range(0,len(edge_list)):
+        edge = edge_list[i_edge]
+        if i_vert in edge:
+            edges_connected_to_vert.append(i_edge)
+
+    return edges_connected_to_vert
+
+def get_tets_connected_to_edge(edge, tet_list):
+
+    tets_connected_to_edge = []
+    for i_tet in range(0,len(tet_list)):
+        tet = tet_list[i_tet]
+        if edge[0] in tet and edge[1] in tet:
+            tets_connected_to_edge.append(i_tet)
+
+    return tets_connected_to_edge
+
+def order_tet_list_into_loop_by_neighbors(tets, tet_neighbors):
+
+    # Strategy:
+    # Pick a random starting tet, go around according to the neighbors
+    # Watch out for the edge! In this case, reverse the chain and try again
+    tets_ordered = []
+
+    # Start
+    local_idx = 0
+    i_tet_last = tets[local_idx]
+    neighbors_last = tet_neighbors[i_tet_last]
+    tets_ordered.append(i_tet_last)
+    del tets[local_idx]
+    # print("      Ordering init: " + str(tets_ordered) + " remaining: " + str(tets) + " neighbors last: " + str(neighbors_last))
+
+    # Go through remaining
+    while len(tets) > 0:
+        # Get a connected tet
+        did_get_a_new_tet = False
+        for local_idx in range(0,len(tets)):
+            i_tet = tets[local_idx]
+            if i_tet in neighbors_last:
+                # Connected
+                i_tet_last = tets[local_idx]
+                neighbors_last = tet_neighbors[i_tet_last]
+                tets_ordered.append(i_tet_last)
+                del tets[local_idx]
+                # print("      Ordering added: " + str(tets_ordered) + " remaining: " + str(tets) + " neighbors last: " + str(neighbors_last))
+                # Next!
+                did_get_a_new_tet = True
+                break
+
+        # Check if we hit the edge
+        if did_get_a_new_tet == False and len(tets) != 0:
+            # We hit the edge
+            # Solution: reverse the list to add tets to the other side!
+            tets_ordered.reverse()
+            i_tet_last = tets_ordered[-1]
+            neighbors_last = tet_neighbors[i_tet_last]
+            # print("      Hit an edge; reversed: " + str(tets_ordered) + " remaining: " + str(tets) + " neighbors last: " + str(neighbors_last))
+
+    return tets_ordered
+
 def voronoi_from_delaunay(vert_list, edge_list, tet_list, tet_neighbors):
 
     print(tet_neighbors)
@@ -22,11 +85,7 @@ def voronoi_from_delaunay(vert_list, edge_list, tet_list, tet_neighbors):
         faces_for_each_cell.append([])
 
         # Get all edges connected to this vert
-        edges_connected_to_vert = []
-        for i_edge in range(0,len(edge_list)):
-            edge = edge_list[i_edge]
-            if i_vert in edge:
-                edges_connected_to_vert.append(i_edge)
+        edges_connected_to_vert = get_edges_connected_to_vert(i_vert, edge_list)
 
         print("Edges connected to vert: " + str(edges_connected_to_vert))
 
@@ -37,52 +96,13 @@ def voronoi_from_delaunay(vert_list, edge_list, tet_list, tet_neighbors):
             print("   Making face from edge: " + str(i_edge))
 
             # Get the tets connected to this edge
-            tets_connected_to_edge = []
-            for i_tet in range(0,len(tet_list)):
-                tet = tet_list[i_tet]
-                if edge[0] in tet and edge[1] in tet:
-                    tets_connected_to_edge.append(i_tet)
+            tets_connected_to_edge = get_tets_connected_to_edge(edge, tet_list)
 
             print("   Tets connected to this edge: " + str(tets_connected_to_edge))
 
-            # Get the verts of the face
-            # verts_of_face = [circumcenters[i_tet] for i_tet in tets_connected_to_edge]
-            # These are the correct verts, but they are not ordered correctly!
-            # Instead: get the order of the tets right first by picking any starting one and going around in a loop
-            # Watch out for the edge!
-            tets_connected_to_edge_ordered = []
-            # Start
-            local_idx = 0
-            i_tet_last = tets_connected_to_edge[local_idx]
-            neighbors_last = tet_neighbors[i_tet_last]
-            tets_connected_to_edge_ordered.append(i_tet_last)
-            del tets_connected_to_edge[local_idx]
-            print("      Ordering init: " + str(tets_connected_to_edge_ordered) + " remaining: " + str(tets_connected_to_edge) + " neighbors last: " + str(neighbors_last))
-            # Go through remaining
-            while len(tets_connected_to_edge) > 0:
-                # Get a connected tet
-                did_get_a_new_tet = False
-                for local_idx in range(0,len(tets_connected_to_edge)):
-                    i_tet = tets_connected_to_edge[local_idx]
-                    if i_tet in neighbors_last:
-                        # Connected
-                        i_tet_last = tets_connected_to_edge[local_idx]
-                        neighbors_last = tet_neighbors[i_tet_last]
-                        tets_connected_to_edge_ordered.append(i_tet_last)
-                        del tets_connected_to_edge[local_idx]
-                        print("      Ordering added: " + str(tets_connected_to_edge_ordered) + " remaining: " + str(tets_connected_to_edge) + " neighbors last: " + str(neighbors_last))
-                        # Next!
-                        did_get_a_new_tet = True
-                        break
-
-                # Check if we hit the edge
-                if did_get_a_new_tet == False and len(tets_connected_to_edge) != 0:
-                    # We hit the edge
-                    # Solution: reverse the list to add tets to the other side!
-                    tets_connected_to_edge_ordered.reverse()
-                    i_tet_last = tets_connected_to_edge_ordered[-1]
-                    neighbors_last = tet_neighbors[i_tet_last]
-                    # print("      Hit an edge; reversed: " + str(tets_connected_to_edge_ordered) + " remaining: " + str(tets_connected_to_edge) + " neighbors last: " + str(neighbors_last))
+            # These are the verts of thise face, but they are not ordered correctly!
+            # Instead: get the order of the tets right first
+            tets_connected_to_edge_ordered = order_tet_list_into_loop_by_neighbors(tets_connected_to_edge, tet_neighbors)
 
             print("   Verts of this face: " + str(tets_connected_to_edge_ordered))
 
