@@ -34,32 +34,6 @@ def get_fnames(extensions_required, files, directory):
     return fnames
 
 
-class ImportTetGenDelaunay(bpy.types.Operator, ImportHelper):
-    bl_idname = "fviz.import_tetgen_delaunay"
-    bl_label = "Import Delaunay from TetGen"
-
-    files = CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
-    directory = StringProperty(subtype='DIR_PATH')
-
-    # Get the filename
-    def execute(self, context):
-
-        extensions_required = [".node", ".edge", ".face", ".ele"]
-        fname_nodes, fname_edges, fname_faces, fname_elements = get_fnames(extensions_required, self.files, self.directory)
-
-        # Import
-        point_list, edge_list, face_list, tet_list = import_tetgen.import_tetgen_delaunay(fname_nodes, fname_edges, fname_faces, fname_elements)
-
-        # Make object
-        make_mesh_object.make_mesh_object_with_idxs("delaunay", point_list, edge_list, face_list)
-
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-
 
 
 class CreateVoronoiFromDelaunay(bpy.types.Operator, ImportHelper):

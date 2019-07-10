@@ -8,6 +8,7 @@ import mathutils
 from . import gui_tetgen
 from . import gui_xml_objs
 from . import gui_xml_operators
+from . import gui_tetgen_delaunay_objs
 
 # Register
 def register():
@@ -40,9 +41,13 @@ class FVizVizPanel(bpy.types.Panel):
 # Class for context that contains all the functions
 class FVizPropGroup(bpy.types.PropertyGroup):
 
-    # List of mesh objects
+    # List of XML objects
     xml_obj_list = CollectionProperty(type=gui_xml_objs.XML_Obj_Mesh, name="XML Object List")
     active_xml_obj_idx = IntProperty(name="Active XML Object Index", default=0)
+
+    # List of Delaunay objects (from tetgen)
+    delaunay_obj_list = CollectionProperty(type=gui_tetgen_delaunay_objs.Delaunay_Obj_Mesh, name="Delaunay Object List")
+    active_delaunay_obj_idx = IntProperty(name="Active Delaunay Object Index", default=0)
 
     # Draw
     def draw(self,layout):
@@ -87,8 +92,20 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         row.label("TetGen", icon='SURFACE_DATA')
 
         row = box.row()
-        row.label("Import TetGen Delaunay")
-        row.operator("fviz.import_tetgen_delaunay")
+        row.label("Delaunay meshes")
+
+        row = box.row()
+        col = row.column()
+
+        col.template_list("Delaunay_Obj_UL_object", "",
+                          self, "delaunay_obj_list",
+                          self, "active_delaunay_obj_idx",
+                          rows=2)
+
+        col = row.column(align=True)
+        col.operator("fviz.delaunay_obj_import", icon='ZOOMIN', text="")
+        col.operator("fviz.delaunay_obj_remove", icon='ZOOMOUT', text="")
+        col.operator("fviz.delaunay_obj_remove_all", icon='X', text="")
 
         row = box.row()
         row.label("Create Voronoi from TetGen Delaunay")
@@ -104,7 +121,7 @@ class FVizPropGroup(bpy.types.PropertyGroup):
 
     # Add a mesh object to the list
     def add_xml_obj(self, name, vert_list, face_list, tet_list):
-        print("Adding mesh object to the list")
+        print("Adding XML object to the list")
 
         # Check by name if the object already is in the list
         current_object_names = [d.name for d in self.xml_obj_list]
@@ -140,7 +157,7 @@ class FVizPropGroup(bpy.types.PropertyGroup):
 
     # Remove a mesh object
     def remove_xml_obj(self):
-        print("Removing mesh object from the list")
+        print("Removing XML object from the list")
 
         self.xml_obj_list.remove ( self.active_xml_obj_idx )
         if self.active_xml_obj_idx > 0:
@@ -148,8 +165,55 @@ class FVizPropGroup(bpy.types.PropertyGroup):
 
     # Remove all mesh objects
     def remove_all_xml_objs(self):
-        print("Removing all mesh objects")
+        print("Removing all XML objects")
 
         while len(self.xml_obj_list) > 0:
             self.xml_obj_list.remove ( 0 )
         self.active_xml_obj_idx = 0
+
+    # Add a mesh object to the list
+    def add_delaunay_obj(self, name, vert_list, face_list, tet_list):
+        print("Adding Delaunay object to the list")
+
+        # Check by name if the object already is in the list
+        current_object_names = [d.name for d in self.delaunay_obj_list]
+        if not name in current_object_names:
+            obj = self.delaunay_obj_list.add()
+        else:
+            idx = current_object_names.index(name)
+            obj = self.delaunay_obj_list[idx]
+
+            # Clear vert list, tet list
+            while len(obj.vert_list) > 0:
+                obj.vert_list.remove ( 0 )
+            while len(obj.face_list) > 0:
+                obj.face_list.remove ( 0 )
+            while len(obj.tet_list) > 0:
+                obj.tet_list.remove ( 0 )
+
+        obj.name = name
+        for i in range(0,len(vert_list)):
+            obj.vert_list.add()
+            obj.vert_list[i].set_from_list_with_idx(vert_list[i])
+        for i in range(0,len(face_list)):
+            obj.face_list.add()
+            obj.face_list[i].set_from_list_with_idx(face_list[i])
+        for i in range(0,len(tet_list)):
+            obj.tet_list.add()
+            obj.tet_list[i].set_from_list_with_idx(tet_list[i])
+
+    # Remove a mesh object
+    def remove_delaunay_obj(self):
+        print("Removing Delaunay object from the list")
+
+        self.delaunay_obj_list.remove ( self.active_delaunay_obj_idx )
+        if self.active_delaunay_obj_idx > 0:
+            self.active_delaunay_obj_idx -= 1
+
+    # Remove all mesh objects
+    def remove_all_delaunay_objs(self):
+        print("Removing all Delaunay objects")
+
+        while len(self.delaunay_obj_list) > 0:
+            self.delaunay_obj_list.remove ( 0 )
+        self.active_delaunay_obj_idx = 0
