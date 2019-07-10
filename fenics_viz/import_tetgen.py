@@ -1,8 +1,59 @@
 
 # File formats are described here:
 # http://wias-berlin.de/software/tetgen/1.5/doc/manual/manual006.html
+# TetGen 1.5.0 has a bug for the Voronoi cell list - its indexes are not correct in the face list
+# Use TetGen 1.4.3 instead available here:
+# http://wias-berlin.de/software/tetgen/tetgen143.html
 
-# def import_tetgen_delaunay(fname_nodes, fname_edges, fname_faces, fname_elements):
+def import_tetgen_delaunay_neighbors(fname_neigh):
+
+    neigh_list = import_simple(fname_neigh, 4)
+
+    # Remove -1
+    neigh_list = [[neigh for neigh in neighs if neigh != -1][1:] for neighs in neigh_list]
+
+    return neigh_list
+
+
+def import_simple(fname, length, floats=False):
+
+    objs = []
+
+    # Import
+    f = open(fname,"r")
+
+    line_ctr = 0
+    for line in f:
+        s = line.split()
+
+        if line_ctr != 0 and len(s) > 0 and s[0] != "#":
+            if floats:
+                vals = [float(x) for x in s[1:1+length]]
+            else:
+                vals = [int(x) for x in s[1:1+length]]
+            objs.append([int(s[0])] + vals)
+
+        line_ctr += 1
+
+    # Close
+    f.close()
+
+    return objs
+
+
+
+def import_tetgen_delaunay(fname_nodes, fname_edges, fname_faces, fname_elements):
+
+    point_list = import_simple(fname_nodes, 3, floats=True)
+    edge_list = import_simple(fname_edges, 2)
+    face_list = import_simple(fname_faces, 3)
+    tet_list = import_simple(fname_elements, 4)
+
+    return [ point_list, edge_list, face_list, tet_list ]
+
+
+
+
 
 def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells):
 
@@ -12,23 +63,7 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells):
     cell_list = []
 
     # Import points (nodes)
-    f = open(fname_nodes,"r")
-
-    line_ctr = 0
-    for line in f:
-        s = line.split()
-
-        if line_ctr == 0:
-            # Get how many elements there are
-            no_points = int(s[0])
-
-        elif len(s) > 0 and s[0] != "#":
-            point_list.append([int(s[0]),float(s[1]),float(s[2]),float(s[3])])
-
-        line_ctr += 1
-
-    # Close
-    f.close()
+    point_list = import_simple(fname_nodes, 3, floats=True)
 
     # Import edges
     f = open(fname_edges,"r")
@@ -52,11 +87,7 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells):
             vert0_idx = int(s[1])
             vert0_pt = point_list[vert0_idx]
             ray = [float(s[3]), float(s[4]), float(s[5])] # s[2] = -1 to indicate boundary
-            print(idx)
-            print(ray)
-            print(vert0_pt)
             vert1_pt = [vert0_pt[i+1] - dist*ray[i] for i in range(0,3)] # i+1 because 0 element is the idx
-            print(vert1_pt)
             # Add the vert
             vert1_idx = len(point_list)
             point_list.append([vert1_idx] + vert1_pt)
@@ -143,9 +174,11 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells):
             no_cells = int(s[0])
 
         elif len(s) > 0 and s[0] != "#":
-            if s[-1] == "-1":
+            if s[-1] == "-1": # remove boundary marker
                 s = s[:-1]
-            cell_list.append(tuple([int(x) for x in s]))
+            idx = int(s[0])
+            face_idxs = [int(x) for x in s[2:]]
+            cell_list.append([idx] + face_idxs)
 
         line_ctr += 1
 
