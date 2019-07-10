@@ -41,7 +41,7 @@ class FVizVizPanel(bpy.types.Panel):
 class FVizPropGroup(bpy.types.PropertyGroup):
 
     # List of mesh objects
-    xml_obj_list = CollectionProperty(type=gui_xml_objs.MeshObject, name="XML Object List")
+    xml_obj_list = CollectionProperty(type=gui_xml_objs.XML_Obj_Mesh, name="XML Object List")
     active_xml_obj_idx = IntProperty(name="Active XML Object Index", default=0)
 
     # Draw
@@ -121,11 +121,16 @@ class FVizPropGroup(bpy.types.PropertyGroup):
                 obj.face_list.remove ( 0 )
             while len(obj.tet_list) > 0:
                 obj.tet_list.remove ( 0 )
+            while len(obj.vertex_subdivided_face_list) > 0:
+                obj.vertex_subdivided_face_list.remove ( 0 )
 
         obj.name = name
         for i in range(0,len(vert_list)):
             obj.vert_list.add()
             obj.vert_list[i].set_from_list_with_idx(vert_list[i])
+            # Also add for subdivided faces
+            obj.vertex_subdivided_face_list.add()
+            obj.vertex_subdivided_face_list[i].idx = i
         for i in range(0,len(face_list)):
             obj.face_list.add()
             obj.face_list[i].set_from_list_with_idx(face_list[i])
