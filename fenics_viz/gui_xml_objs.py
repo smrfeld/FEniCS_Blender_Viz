@@ -8,7 +8,7 @@ import os
 
 from . import import_xml_mesh
 from . import make_mesh_object
-from . import gui_general_tet_objs
+from . import gui_common_objs
 
 class XML_Obj_Vertex_Subdivded_Faces(bpy.types.PropertyGroup):
     faces = StringProperty ( name="Faces", default="", description="Subdivided faces for this vertex" )
@@ -17,9 +17,9 @@ class XML_Obj_Vertex_Subdivded_Faces(bpy.types.PropertyGroup):
 # Class to hold the object
 class XML_Obj_Mesh(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
-    vert_list = CollectionProperty(type=gui_general_tet_objs.TetVertex, name = "Vertex list")
-    face_list = CollectionProperty(type=gui_general_tet_objs.TetFace, name = "Face list")
-    tet_list = CollectionProperty(type=gui_general_tet_objs.Tet, name = "Tet list")
+    vert_list = CollectionProperty(type=gui_common_objs.Vertex, name = "Vertex list")
+    face_list = CollectionProperty(type=gui_common_objs.TetFace, name = "Face list")
+    tet_list = CollectionProperty(type=gui_common_objs.Tet, name = "Tet list")
     vertex_subdivided_face_list = CollectionProperty(type=XML_Obj_Vertex_Subdivded_Faces, name = "Subdivided face list for each vertex")
 
     # Draw in list of objects

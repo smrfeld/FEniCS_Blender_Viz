@@ -71,31 +71,6 @@ class CreateVoronoiFromDelaunay(bpy.types.Operator, ImportHelper):
 
 
 
-class ImportTetGenVoronoi(bpy.types.Operator, ImportHelper):
-    bl_idname = "fviz.import_tetgen_voronoi"
-    bl_label = "Import Voronoi from TetGen"
-
-    files = CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
-    directory = StringProperty(subtype='DIR_PATH')
-
-    # Get the filename
-    def execute(self, context):
-
-        extensions_required = [".node", ".edge", ".face", ".cell"]
-        fname_nodes, fname_edges, fname_faces, fname_cells = get_fnames(extensions_required, self.files, self.directory)
-
-        # Import
-        point_list, edge_list, face_list, cell_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells)
-
-        # Make object
-        make_mesh_object.make_mesh_object_with_idxs("voronoi", point_list, edge_list, face_list)
-
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
 
 class ImportTetGenVoronoiSeparate(bpy.types.Operator, ImportHelper):
     bl_idname = "fviz.import_tetgen_voronoi_separate"

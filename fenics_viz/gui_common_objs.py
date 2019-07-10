@@ -3,7 +3,7 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
 
-class TetVertex(bpy.types.PropertyGroup):
+class Vertex(bpy.types.PropertyGroup):
     xval = FloatProperty( default= 0.0, precision=8, name="x" )
     yval = FloatProperty( default= 0.0, precision=8, name="y" )
     zval = FloatProperty( default= 0.0, precision=8, name="z" )
@@ -58,3 +58,38 @@ class Tet(bpy.types.PropertyGroup):
 
     def get_list_with_idx(self):
         return [self.idx,self.v0,self.v1,self.v2,self.v3]
+
+class Idx(bpy.types.PropertyGroup):
+    idx = IntProperty( default = 0 )
+
+class CellFace(bpy.types.PropertyGroup):
+    idx = IntProperty( default = 0, name="idx" )
+    verts = CollectionProperty(type=Idx, name="Verts")
+
+    def set_from_list_with_idx(self, arr):
+        self.idx = arr[0]
+        for v in arr[1:]:
+            self.verts.add()
+            self.verts[-1].idx = v
+
+    def get_list(self):
+        return [v.idx for v in self.verts]
+
+    def get_list_with_idx(self):
+        return [self.idx] + self.get_list()
+
+class Cell(bpy.types.PropertyGroup):
+    idx = IntProperty( default = 0, name="idx" )
+    faces = CollectionProperty(type=Idx, name="Faces")
+
+    def set_from_list_with_idx(self, arr):
+        self.idx = arr[0]
+        for f in arr[1:]:
+            self.faces.add()
+            self.faces[-1].idx = f
+
+    def get_list(self):
+        return [f.idx for f in self.faces]
+
+    def get_list_with_idx(self):
+        return [self.idx] + self.get_list()
