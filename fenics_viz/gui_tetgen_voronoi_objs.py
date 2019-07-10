@@ -8,6 +8,7 @@ from . import gui_common_objs
 from . import fname_helper
 from . import import_tetgen
 from . import make_mesh_object
+from . import fix_tetgen_voronoi
 
 # Class to hold the object
 class Voronoi_Obj_Mesh(bpy.types.PropertyGroup):
@@ -75,14 +76,13 @@ class Voronoi_Obj_Import(bpy.types.Operator, ImportHelper):
         fname_nodes, fname_edges, fname_faces = fname_helper.get_fnames(extensions_required, self.files, self.directory)
 
         # Import
-        vert_list, edge_list, face_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces)
+        no_points_interior, vert_list, edge_list, face_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces)
 
         # Get voronoi cells - there is a bug in tetgen 1.5.1 that does not generate these correctly
         delaunay_vert_list = [v.get_list() for v in delaunay_obj.vert_list]
+        delaunay_edge_list = [e.get_list() for e in delaunay_obj.edge_list]
         delaunay_tet_list = [t.get_list() for t in delaunay_obj.tet_list]
-        vert_list_wo_idxs = [v[1:] for v in vert_list]
-        face_list_wo_idxs = [f[1:] for f in face_list]
-        cell_list = fix_tetgen_voronoi.make_cell_list(vert_list_wo_idxs, face_list_wo_idxs, delaunay_vert_list, delaunay_tet_list)
+        cell_list = fix_tetgen_voronoi.make_cell_list(no_points_interior, vert_list, face_list, delaunay_vert_list, delaunay_edge_list, delaunay_tet_list)
 
         # Make object
         obj_name = fname_helper.get_base_name(fname_nodes)

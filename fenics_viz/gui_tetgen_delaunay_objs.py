@@ -13,6 +13,7 @@ from . import make_mesh_object
 class Delaunay_Obj_Mesh(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     vert_list = CollectionProperty(type=gui_common_objs.Vertex, name = "Vertex list")
+    edge_list = CollectionProperty(type=gui_common_objs.Edge, name = "Edge list")
     face_list = CollectionProperty(type=gui_common_objs.TetFace, name = "Face list")
     tet_list = CollectionProperty(type=gui_common_objs.Tet, name = "Tet list")
 
@@ -75,7 +76,7 @@ class Delaunay_Obj_Import(bpy.types.Operator, ImportHelper):
         make_mesh_object.make_mesh_object(obj_name, point_list, edge_list, face_list)
 
         # Add to the list
-        context.scene.fviz.add_delaunay_obj(obj_name, point_list, face_list, tet_list)
+        context.scene.fviz.add_delaunay_obj(obj_name, point_list, edge_list, face_list, tet_list)
 
         return {'FINISHED'}
 

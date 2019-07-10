@@ -1,75 +1,107 @@
 
-# See here
-# https://math.stackexchange.com/questions/894794/sphere-equation-given-4-points
+from . import circumcenter_sphere
 
-def circumcenter_sphere_from_pt_list(pts):
-    return circumcenter_sphere_from_pts(pts[0],pts[1],pts[2],pts[3])
+def voronoi_from_delaunay(vert_list, edge_list, tet_list, tet_neighbors):
 
-def circumcenter_sphere_from_pts(p1, p2, p3, p4):
-    return circumcenter_sphere_from_pt_coords(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2],p3[0],p3[1],p3[2],p4[0],p4[1],p4[2])
-
-def circumcenter_sphere_from_pt_coords(p1x, p1y, p1z, p2x, p2y, p2z, p3x, p3y, p3z, p4x, p4y, p4z):
-    r1s = pow(p1x,2)+pow(p1y,2)+pow(p1z,2)
-    r2s = pow(p2x,2)+pow(p2y,2)+pow(p2z,2)
-    r3s = pow(p3x,2)+pow(p3y,2)+pow(p3z,2)
-    r4s = pow(p4x,2)+pow(p4y,2)+pow(p4z,2)
-
-    ax2 = -p1x*p2z*p3y+p1x*p2y*p3z+p2z*p3y*p4x-p2y*p3z*p4x+p1x*p2z*p4y-p2z*p3x*p4y-p1x*p3z*p4y+p2x*p3z*p4y+p1z*( p2x*p3y-p3y*p4x+p2y*( -p3x+p4x )-p2x*p4y+p3x*p4y )+( -p1x*p2y+p2y*p3x+p1x*p3y-p2x*p3y )*p4z+p1y*( p2z*p3x-p2x*p3z-p2z*p4x+p3z*p4x+p2x*p4z-p3x*p4z )
-
-    bx = p3z*p4y*r1s-p3y*p4z*r1s-p1z*p3y*r2s+p1y*p3z*r2s+p1z*p4y*r2s-p3z*p4y*r2s-p1y*p4z*r2s+p3y*p4z*r2s-p1z*p4y*r3s+p1y*p4z*r3s+p1z*p3y*r4s-p1y*p3z*r4s+p2z*(-p4y*r1s-p1y*r3s+p4y*r3s+p3y*(r1s-r4s)+p1y*r4s)+p2y*(-p3z*r1s+p4z*r1s+p1z*r3s-p4z*r3s-p1z*r4s+p3z*r4s)
-
-    ay2 = -p1x*p2z*p3y+p1x*p2y*p3z+p2z*p3y*p4x-p2y*p3z*p4x+p1x*p2z*p4y-p2z*p3x*p4y-p1x*p3z*p4y+p2x*p3z*p4y+p1z*(p2x*p3y-p3y*p4x+p2y*(-p3x+p4x)-p2x*p4y+p3x*p4y)+(-p1x*p2y+p2y*p3x+p1x*p3y-p2x*p3y)*p4z+p1y*(p2z*p3x-p2x*p3z-p2z*p4x+p3z*p4x+p2x*p4z-p3x*p4z)
-
-    by = -p3z*p4x*r1s+p3x*p4z*r1s+p1z*p3x*r2s-p1x*p3z*r2s-p1z*p4x*r2s+p3z*p4x*r2s+p1x*p4z*r2s-p3x*p4z*r2s+p1z*p4x*r3s-p1x*p4z*r3s-p1z*p3x*r4s+p1x*p3z*r4s+p2x*(p3z*r1s-p4z*r1s-p1z*r3s+p4z*r3s+p1z*r4s-p3z*r4s)+p2z*(p4x*r1s+p1x*r3s-p4x*r3s-p1x*r4s+p3x*(-r1s+r4s))
-
-    az2 = -p1x*p2z*p3y+p1x*p2y*p3z+p2z*p3y*p4x-p2y*p3z*p4x+p1x*p2z*p4y-p2z*p3x*p4y-p1x*p3z*p4y+p2x*p3z*p4y+p1z*(p2x*p3y-p3y*p4x+p2y*(-p3x+p4x)-p2x*p4y+p3x*p4y)+(-p1x*p2y+p2y*p3x+p1x*p3y-p2x*p3y)*p4z+p1y*(p2z*p3x-p2x*p3z-p2z*p4x+p3z*p4x+p2x*p4z-p3x*p4z)
-
-    bz = p3y*p4x*r1s-p3x*p4y*r1s-p1y*p3x*r2s+p1x*p3y*r2s+p1y*p4x*r2s-p3y*p4x*r2s-p1x*p4y*r2s+p3x*p4y*r2s-p1y*p4x*r3s+p1x*p4y*r3s+p1y*p3x*r4s-p1x*p3y*r4s+p2y*(-p4x*r1s-p1x*r3s+p4x*r3s+p3x*(r1s-r4s)+p1x*r4s)+p2x*(-p3y*r1s+p4y*r1s+p1y*r3s-p4y*r3s-p1y*r4s+p3y*r4s)
-
-    dx = - bx / (2.0 * ax2)
-    dy = - by / (2.0 * ay2)
-    dz = - bz / (2.0 * az2)
-
-    return [dx, dy, dz]
-
-def voroni_from_delaunay(vert_list, tet_list, tet_neighbors):
+    print(tet_neighbors)
 
     # Go through all tets, get circumcenters
     circumcenters = []
     for tet in tet_list:
-        pts = [vert_list[v][1:] for v in tet[1:]]
-        circumcenters.append(circumcenter_sphere_from_pt_list(pts))
+        pts = [vert_list[v] for v in tet]
+        circumcenters.append(circumcenter_sphere.circumcenter_sphere_from_pt_list(pts))
 
-    # Go through all verts, make nodes, edges
-    nodes_for_each_cell = []
-    edges_for_each_cell = []
+    # Go through all verts; each gets a cell
+    faces_for_each_cell = []
+    verts_for_each_cell = []
     for i_vert in range(0,len(vert_list)):
 
-        # Get all tets connected to this vertex
-        tets_connected = []
-        for i_tet in range(0,len(tet_list)):
-            if i_vert in tet_list[i_tet][1:]:
-                tets_connected.append(i_tet)
+        print("Doing vert: " + str(i_vert) + " / " + str(len(vert_list)))
 
-        # Points
-        nodes_for_each_cell.append([])
+        # New entry
+        faces_for_each_cell.append([])
+
+        # Get all edges connected to this vert
+        edges_connected_to_vert = []
+        for i_edge in range(0,len(edge_list)):
+            edge = edge_list[i_edge]
+            if i_vert in edge:
+                edges_connected_to_vert.append(i_edge)
+
+        print("Edges connected to vert: " + str(edges_connected_to_vert))
+
+        # Go through all edges; make faces
+        for i_edge in edges_connected_to_vert:
+            edge = edge_list[i_edge]
+
+            print("   Making face from edge: " + str(i_edge))
+
+            # Get the tets connected to this edge
+            tets_connected_to_edge = []
+            for i_tet in range(0,len(tet_list)):
+                tet = tet_list[i_tet]
+                if edge[0] in tet and edge[1] in tet:
+                    tets_connected_to_edge.append(i_tet)
+
+            print("   Tets connected to this edge: " + str(tets_connected_to_edge))
+
+            # Get the verts of the face
+            # verts_of_face = [circumcenters[i_tet] for i_tet in tets_connected_to_edge]
+            # These are the correct verts, but they are not ordered correctly!
+            # Instead: get the order of the tets right first by picking any starting one and going around in a loop
+            # Watch out for the edge!
+            tets_connected_to_edge_ordered = []
+            # Start
+            local_idx = 0
+            i_tet_last = tets_connected_to_edge[local_idx]
+            neighbors_last = tet_neighbors[i_tet_last]
+            tets_connected_to_edge_ordered.append(i_tet_last)
+            del tets_connected_to_edge[local_idx]
+            print("      Ordering init: " + str(tets_connected_to_edge_ordered) + " remaining: " + str(tets_connected_to_edge) + " neighbors last: " + str(neighbors_last))
+            # Go through remaining
+            while len(tets_connected_to_edge) > 0:
+                # Get a connected tet
+                did_get_a_new_tet = False
+                for local_idx in range(0,len(tets_connected_to_edge)):
+                    i_tet = tets_connected_to_edge[local_idx]
+                    if i_tet in neighbors_last:
+                        # Connected
+                        i_tet_last = tets_connected_to_edge[local_idx]
+                        neighbors_last = tet_neighbors[i_tet_last]
+                        tets_connected_to_edge_ordered.append(i_tet_last)
+                        del tets_connected_to_edge[local_idx]
+                        print("      Ordering added: " + str(tets_connected_to_edge_ordered) + " remaining: " + str(tets_connected_to_edge) + " neighbors last: " + str(neighbors_last))
+                        # Next!
+                        did_get_a_new_tet = True
+                        break
+
+                # Check if we hit the edge
+                if did_get_a_new_tet == False and len(tets_connected_to_edge) != 0:
+                    # We hit the edge
+                    # Solution: reverse the list to add tets to the other side!
+                    tets_connected_to_edge_ordered.reverse()
+                    i_tet_last = tets_connected_to_edge_ordered[-1]
+                    neighbors_last = tet_neighbors[i_tet_last]
+                    # print("      Hit an edge; reversed: " + str(tets_connected_to_edge_ordered) + " remaining: " + str(tets_connected_to_edge) + " neighbors last: " + str(neighbors_last))
+
+            print("   Verts of this face: " + str(tets_connected_to_edge_ordered))
+
+            # Add faces
+            faces_for_each_cell[-1].append(tets_connected_to_edge_ordered)
+
+        # Convert to local idxs
+        all_verts = []
         global_to_local_idx_dict = {}
-        for tet in tets_connected:
-            nodes_for_each_cell[-1].append(circumcenters[tet])
-            global_to_local_idx_dict[tet] = len(nodes_for_each_cell[-1]) - 1
+        for face in faces_for_each_cell[-1]:
+            for vert in face:
+                if not vert in all_verts:
+                    all_verts.append(vert)
+                    global_to_local_idx_dict[vert] = len(all_verts) - 1
 
-        # Make edges
-        edges_for_each_cell.append([])
-        # Go through all pairs of connected tets
-        for i1 in range(0,len(tets_connected)):
-            for i2 in range(i1+1,len(tets_connected)):
-                tet1 = tets_connected[i1]
-                tet2 = tets_connected[i2]
-                # Check if neighbors
-                if tet2 in tet_neighbors[tet1]:
-                    # Yes neighbors; connect with an edge!
-                    l1 = global_to_local_idx_dict[tet1]
-                    l2 = global_to_local_idx_dict[tet2]
-                    edges_for_each_cell[-1].append(sorted([l1,l2]))
+        # New entry
+        verts_for_each_cell.append([circumcenters[i_vert] for i_vert in all_verts])
 
-    return [ nodes_for_each_cell, edges_for_each_cell ]
+        # Convert face idxs to local idxs
+        faces_for_each_cell[-1] = [[global_to_local_idx_dict[i_vert] for i_vert in face] for face in faces_for_each_cell[-1]]
+
+    return [ verts_for_each_cell, faces_for_each_cell ]

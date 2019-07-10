@@ -10,6 +10,7 @@ from . import gui_xml_objs
 from . import gui_xml_operators
 from . import gui_tetgen_delaunay_objs
 from . import gui_tetgen_voronoi_objs
+from . import gui_tetgen_voronoi_operators
 
 # Register
 def register():
@@ -114,12 +115,6 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         col.operator("fviz.delaunay_obj_remove", icon='ZOOMOUT', text="")
         col.operator("fviz.delaunay_obj_remove_all", icon='X', text="")
 
-        '''
-        row = box.row()
-        row.label("Create Voronoi from TetGen Delaunay")
-        row.operator("fviz.create_voronoi")
-        '''
-
         # Voronoi
 
         row = box.row()
@@ -139,8 +134,12 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         col.operator("fviz.voronoi_obj_remove_all", icon='X', text="")
 
         row = box.row()
-        row.label("Import TetGen Voronoi as separate objs")
-        row.operator("fviz.import_tetgen_voronoi_separate")
+        row.label("Create Voronoi from TetGen Delaunay")
+        row.operator("fviz.voronoi_obj_create_from_delaunay")
+
+        row = box.row()
+        row.label("Make separate objects for each cell")
+        row.operator("fviz.voronoi_obj_separate")
 
     # Add a mesh object to the list
     def add_xml_obj(self, name, vert_list, face_list, tet_list):
@@ -194,7 +193,7 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         self.active_xml_obj_idx = 0
 
     # Add a mesh object to the list
-    def add_delaunay_obj(self, name, vert_list, face_list, tet_list):
+    def add_delaunay_obj(self, name, vert_list, edge_list, face_list, tet_list):
         print("Adding Delaunay object to the list")
 
         # Check by name if the object already is in the list
@@ -208,6 +207,8 @@ class FVizPropGroup(bpy.types.PropertyGroup):
             # Clear vert list, tet list
             while len(obj.vert_list) > 0:
                 obj.vert_list.remove ( 0 )
+            while len(obj.edge_list) > 0:
+                obj.edge_list.remove ( 0 )
             while len(obj.face_list) > 0:
                 obj.face_list.remove ( 0 )
             while len(obj.tet_list) > 0:
@@ -217,6 +218,9 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         for v in vert_list:
             obj.vert_list.add()
             obj.vert_list[-1].set_from_list(v)
+        for e in edge_list:
+            obj.edge_list.add()
+            obj.edge_list[-1].set_from_list(e)
         for f in face_list:
             obj.face_list.add()
             obj.face_list[-1].set_from_list(f)

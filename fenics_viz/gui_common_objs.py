@@ -16,6 +16,17 @@ class Vertex(bpy.types.PropertyGroup):
     def get_list(self):
         return [self.xval,self.yval,self.zval]
 
+class Edge(bpy.types.PropertyGroup):
+    v0 = IntProperty( default = 0, name="v0" )
+    v1 = IntProperty( default = 0, name="v1" )
+
+    def set_from_list(self, arr):
+        self.v0 = arr[0]
+        self.v1 = arr[1]
+
+    def get_list(self):
+        return [self.v0,self.v1]
+
 class TetFace(bpy.types.PropertyGroup):
     v0 = IntProperty( default = 0, name="v0" )
     v1 = IntProperty( default = 0, name="v1" )

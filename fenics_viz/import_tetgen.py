@@ -10,7 +10,7 @@ def import_tetgen_delaunay_neighbors(fname_neigh):
     neigh_list = import_simple(fname_neigh, 4)
 
     # Remove -1
-    neigh_list = [[neigh for neigh in neighs if neigh != -1][1:] for neighs in neigh_list]
+    neigh_list = [[neigh for neigh in neighs if neigh != -1] for neighs in neigh_list]
 
     return neigh_list
 
@@ -65,6 +65,7 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces):
 
     # Import points (nodes)
     point_list = import_simple(fname_nodes, 3, floats=True)
+    no_points_interior = len(point_list)
 
     edge_list = []
     face_list = []
@@ -94,7 +95,7 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces):
             vert1_pt = [vert0_pt[i] - dist*ray[i] for i in range(0,3)]
             # Add the vert
             vert1_idx = len(point_list)
-            point_list.append([vert1_idx] + vert1_pt)
+            point_list.append(vert1_pt)
             edge_list.append([idx, vert0_idx, vert1_idx])
 
         line_ctr += 1
@@ -174,4 +175,4 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces):
     edge_list = [x[1:] for x in edge_list]
     face_list = [x[1:] for x in face_list]
 
-    return [ point_list, edge_list, face_list ]
+    return [ no_points_interior, point_list, edge_list, face_list ]
