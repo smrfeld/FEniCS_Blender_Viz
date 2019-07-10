@@ -64,11 +64,10 @@ class Voronoi_Obj_Import(bpy.types.Operator, ImportHelper):
     # Get the filename
     def execute(self, context):
 
-        if len(f.delaunay_obj_list) == 0:
-            raise SystemError("Must have already imported and selected Delaunay mesh!")
-
         # Get the active delaunay object
         f = context.scene.fviz
+        if len(f.delaunay_obj_list) == 0:
+            raise SystemError("Must have already imported and selected Delaunay mesh!")
         delaunay_obj = f.delaunay_obj_list[f.active_delaunay_obj_idx]
 
         # Get the selected filenames

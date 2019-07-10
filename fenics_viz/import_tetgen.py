@@ -91,7 +91,7 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces):
             vert0_idx = int(s[1])
             vert0_pt = point_list[vert0_idx]
             ray = [float(s[3]), float(s[4]), float(s[5])] # s[2] = -1 to indicate boundary
-            vert1_pt = [vert0_pt[i+1] - dist*ray[i] for i in range(0,3)] # i+1 because 0 element is the idx
+            vert1_pt = [vert0_pt[i] - dist*ray[i] for i in range(0,3)]
             # Add the vert
             vert1_idx = len(point_list)
             point_list.append([vert1_idx] + vert1_pt)
