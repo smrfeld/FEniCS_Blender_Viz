@@ -11,15 +11,15 @@ from . import make_materials_for_subdivided_mesh
 from . import color_subdivided_mesh
 
 # Subdivide faces
-class SubdivideFaces(bpy.types.Operator):
-    bl_idname = "fviz.subdivide_faces"
+class XML_Obj_SubdivideFaces(bpy.types.Operator):
+    bl_idname = "fviz.xml_obj_subdivide_faces"
     bl_label = "Subdivide faces"
 
     def execute ( self, context ):
 
         # Get the selected object
         f = context.scene.fviz
-        obj = f.mesh_obj_list[f.active_object_index]
+        obj = f.xml_obj_list[f.active_xml_obj_idx]
 
         # Verts and faces
         vert_list = [v.get_list() for v in obj.vert_list]
@@ -57,8 +57,8 @@ class SubdivideFaces(bpy.types.Operator):
 
         return {"FINISHED"}
 
-class VisualizeTimepoint(bpy.types.Operator, ImportHelper):
-    bl_idname = "fviz.visualize_timepoint"
+class XML_Obj_VisualizeTimepoint(bpy.types.Operator, ImportHelper):
+    bl_idname = "fviz.xml_obj_visualize_timepoint"
     bl_label = "Visualize a timpoint"
 
     filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
@@ -81,7 +81,7 @@ class VisualizeTimepoint(bpy.types.Operator, ImportHelper):
 
             # Current object
             f = context.scene.fviz
-            obj = f.mesh_obj_list[f.active_object_index]
+            obj = f.xml_obj_list[f.active_xml_obj_idx]
 
             # Convert vals to verts
             vert_vals = []

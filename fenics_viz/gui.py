@@ -41,11 +41,13 @@ class FVizVizPanel(bpy.types.Panel):
 class FVizPropGroup(bpy.types.PropertyGroup):
 
     # List of mesh objects
-    mesh_obj_list = CollectionProperty(type=gui_xml_objs.MeshObject, name="Mesh List")
-    active_object_index = IntProperty(name="Active Object Index", default=0)
+    xml_obj_list = CollectionProperty(type=gui_xml_objs.MeshObject, name="XML Object List")
+    active_xml_obj_idx = IntProperty(name="Active XML Object Index", default=0)
 
     # Draw
     def draw(self,layout):
+
+        # XML
 
         box = layout.box()
         row = box.row(align=True)
@@ -57,15 +59,32 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         row = box.row()
         col = row.column()
 
-        col.template_list("FViz_UL_object", "",
-                          self, "mesh_obj_list",
-                          self, "active_object_index",
+        col.template_list("XML_Obj_UL_object", "",
+                          self, "xml_obj_list",
+                          self, "active_xml_obj_idx",
                           rows=2)
 
         col = row.column(align=True)
-        col.operator("fviz.import_mesh", icon='ZOOMIN', text="")
-        col.operator("fviz.mesh_object_remove", icon='ZOOMOUT', text="")
-        col.operator("fviz.mesh_object_remove_all", icon='X', text="")
+        col.operator("fviz.xml_obj_import", icon='ZOOMIN', text="")
+        col.operator("fviz.xml_obj_remove", icon='ZOOMOUT', text="")
+        col.operator("fviz.xml_obj_remove_all", icon='X', text="")
+
+        row = box.row()
+        row.label("Subdivide faces")
+        row.operator("fviz.xml_obj_subdivide_faces")
+
+        row = box.row()
+        row.label("Visualize timepoint")
+        row.operator("fviz.xml_obj_visualize_timepoint")
+
+        # TETGEN
+
+        box = layout.box()
+        row = box.row(align=True)
+        row.alignment = 'LEFT'
+
+        row = box.row()
+        row.label("TetGen", icon='SURFACE_DATA')
 
         row = box.row()
         row.label("Import TetGen Delaunay")
@@ -83,26 +102,17 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         row.label("Import TetGen Voronoi as separate objs")
         row.operator("fviz.import_tetgen_voronoi_separate")
 
-        row = box.row()
-        row.label("Subdivide faces")
-        row.operator("fviz.subdivide_faces")
-
-        row = box.row()
-        row.label("Visualize timepoint")
-        row.operator("fviz.visualize_timepoint")
-
-
     # Add a mesh object to the list
-    def add_mesh_object(self, name, vert_list, face_list, tet_list):
+    def add_xml_obj(self, name, vert_list, face_list, tet_list):
         print("Adding mesh object to the list")
 
         # Check by name if the object already is in the list
-        current_object_names = [d.name for d in self.mesh_obj_list]
+        current_object_names = [d.name for d in self.xml_obj_list]
         if not name in current_object_names:
-            obj = self.mesh_obj_list.add()
+            obj = self.xml_obj_list.add()
         else:
             idx = current_object_names.index(name)
-            obj = self.mesh_obj_list[idx]
+            obj = self.xml_obj_list[idx]
 
             # Clear vert list, tet list
             while len(obj.vert_list) > 0:
@@ -124,17 +134,17 @@ class FVizPropGroup(bpy.types.PropertyGroup):
             obj.tet_list[i].set_from_list_with_idx(tet_list[i])
 
     # Remove a mesh object
-    def remove_mesh_object(self):
+    def remove_xml_obj(self):
         print("Removing mesh object from the list")
 
-        self.mesh_obj_list.remove ( self.active_object_index )
-        if self.active_object_index > 0:
-            self.active_object_index -= 1
+        self.xml_obj_list.remove ( self.active_xml_obj_idx )
+        if self.active_xml_obj_idx > 0:
+            self.active_xml_obj_idx -= 1
 
     # Remove all mesh objects
-    def remove_all_mesh_objects(self):
+    def remove_all_xml_objs(self):
         print("Removing all mesh objects")
 
-        while len(self.mesh_obj_list) > 0:
-            self.mesh_obj_list.remove ( 0 )
-        self.active_object_index = 0
+        while len(self.xml_obj_list) > 0:
+            self.xml_obj_list.remove ( 0 )
+        self.active_xml_obj_idx = 0

@@ -84,38 +84,38 @@ class MeshObject(bpy.types.PropertyGroup):
 ########################################
 
 # Model object item to draw in the list
-class FViz_UL_object(bpy.types.UIList):
+class XML_Obj_UL_object(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # The item will be a MeshObject
         # Let it draw itself in a new row:
         item.draw_item_in_row ( layout.row() )
 
 # Button to remove model object
-class FVizObjectRemove(bpy.types.Operator):
-    bl_idname = "fviz.mesh_object_remove"
+class XML_Obj_Remove(bpy.types.Operator):
+    bl_idname = "fviz.xml_obj_remove"
     bl_label = "Remove a Mesh Object"
     bl_description = "Remove a mesh object"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.scene.fviz.remove_mesh_object()
+        context.scene.fviz.remove_xml_obj()
         return {'FINISHED'}
 
 # Button to remove all model objects
-class FVizObjectRemoveAll(bpy.types.Operator):
-    bl_idname = "fviz.mesh_object_remove_all"
+class XML_Obj_Remove_All(bpy.types.Operator):
+    bl_idname = "fviz.xml_obj_remove_all"
     bl_label = "Remove all Mesh Objects"
     bl_description = "Remove all mesh objects"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.scene.fviz.remove_all_mesh_objects()
+        context.scene.fviz.remove_all_xml_objs()
         return {'FINISHED'}
 
 # Import mesh
-class ImportMesh(bpy.types.Operator, ImportHelper):
-    bl_idname = "fviz.import_mesh"
-    bl_label = "Import mesh"
+class XML_Obj_Import(bpy.types.Operator, ImportHelper):
+    bl_idname = "fviz.xml_obj_import"
+    bl_label = "Import XML Object"
 
     filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
     filename_ext = ".xml" # allowed extensions
@@ -138,7 +138,7 @@ class ImportMesh(bpy.types.Operator, ImportHelper):
             make_mesh_object.make_mesh_object_with_idxs(filename, vert_list, edge_list, face_list)
 
             # Add to the list
-            context.scene.fviz.add_mesh_object(filename, vert_list, face_list, tet_list)
+            context.scene.fviz.add_xml_obj(filename, vert_list, face_list, tet_list)
 
         return {'FINISHED'}
 
