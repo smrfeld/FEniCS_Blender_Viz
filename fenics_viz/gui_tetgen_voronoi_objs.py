@@ -64,18 +64,33 @@ class Voronoi_Obj_Import(bpy.types.Operator, ImportHelper):
     # Get the filename
     def execute(self, context):
 
-        extensions_required = [".node", ".edge", ".face", ".cell"]
-        fname_nodes, fname_edges, fname_faces, fname_cells = fname_helper.get_fnames(extensions_required, self.files, self.directory)
+        if len(f.delaunay_obj_list) == 0:
+            raise SystemError("Must have already imported and selected Delaunay mesh!")
+
+        # Get the active delaunay object
+        f = context.scene.fviz
+        delaunay_obj = f.delaunay_obj_list[f.active_delaunay_obj_idx]
+
+        # Get the selected filenames
+        extensions_required = [".node", ".edge", ".face"]
+        fname_nodes, fname_edges, fname_faces = fname_helper.get_fnames(extensions_required, self.files, self.directory)
 
         # Import
-        point_list, edge_list, face_list, cell_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells)
+        vert_list, edge_list, face_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces)
+
+        # Get voronoi cells - there is a bug in tetgen 1.5.1 that does not generate these correctly
+        delaunay_vert_list = [v.get_list() for v in delaunay_obj.vert_list]
+        delaunay_tet_list = [t.get_list() for t in delaunay_obj.tet_list]
+        vert_list_wo_idxs = [v[1:] for v in vert_list]
+        face_list_wo_idxs = [f[1:] for f in face_list]
+        cell_list = fix_tetgen_voronoi.make_cell_list(vert_list_wo_idxs, face_list_wo_idxs, delaunay_vert_list, delaunay_tet_list)
 
         # Make object
         obj_name = fname_helper.get_base_name(fname_nodes)
-        make_mesh_object.make_mesh_object_with_idxs(obj_name, point_list, edge_list, face_list)
+        make_mesh_object.make_mesh_object(obj_name, vert_list, edge_list, face_list)
 
         # Add to the list
-        context.scene.fviz.add_voronoi_obj(obj_name, point_list, face_list, cell_list)
+        context.scene.fviz.add_voronoi_obj(obj_name, vert_list, face_list, cell_list)
 
         return {'FINISHED'}
 

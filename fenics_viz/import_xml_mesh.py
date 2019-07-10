@@ -1,42 +1,34 @@
 import re
 
-def edge_list_from_tet_list_with_idxs(tet_list):
+def edge_list_from_tet_list(tet_list):
     edge_list = []
     for t in tet_list:
+        edge_list.append(sorted([t[0],t[1]]))
+        edge_list.append(sorted([t[0],t[2]]))
+        edge_list.append(sorted([t[0],t[3]]))
         edge_list.append(sorted([t[1],t[2]]))
         edge_list.append(sorted([t[1],t[3]]))
-        edge_list.append(sorted([t[1],t[4]]))
         edge_list.append(sorted([t[2],t[3]]))
-        edge_list.append(sorted([t[2],t[4]]))
-        edge_list.append(sorted([t[3],t[4]]))
 
     # Delete duplicate edges
     tmp = set(tuple(x) for x in edge_list)
     edge_list = [ list(x) for x in tmp ]
 
-    # Add idxs
-    for i in range(0, len(edge_list)):
-        edge_list[i] = [i] + edge_list[i]
-
     return edge_list
 
-def face_list_from_tet_list_with_idxs(tet_list):
+def face_list_from_tet_list(tet_list):
 
     # Faces from tets
     face_list = []
     for t in tet_list:
+        face_list.append(sorted([t[0],t[1],t[2]]))
+        face_list.append(sorted([t[0],t[1],t[3]]))
+        face_list.append(sorted([t[0],t[2],t[3]]))
         face_list.append(sorted([t[1],t[2],t[3]]))
-        face_list.append(sorted([t[1],t[2],t[4]]))
-        face_list.append(sorted([t[1],t[3],t[4]]))
-        face_list.append(sorted([t[2],t[3],t[4]]))
 
     # Delete duplicate faces
     tmp = set(tuple(x) for x in face_list)
     face_list = [ list(x) for x in tmp ]
-
-    # Add idxs
-    for i in range(0, len(face_list)):
-        face_list[i] = [i] + face_list[i]
 
     return face_list
 
@@ -58,7 +50,7 @@ def import_xml_mesh(fname):
             points = [float(line[starts[2*i]+1:starts[2*i+1]]) for i in range(1,4)]
             vert_list.append([idx] + points)
 
-        if len(s) > 0 and s[0] == "<tetrahedron":
+        if len(s) > 0 and (s[0] == "<tetrahedron" or s[0] == "<triangle"):
             # Elements; find quotes
             starts = [match.start() for match in re.finditer(re.escape("\""), line)]
             idx = int(line[starts[0]+1:starts[1]])
@@ -72,4 +64,8 @@ def import_xml_mesh(fname):
     vert_list.sort(key=lambda x: x[0])
     tet_list.sort(key=lambda x: x[0])
 
-    return [vert_list, edge_list_from_tet_list_with_idxs(tet_list), face_list_from_tet_list_with_idxs(tet_list), tet_list]
+    # Strip the idx
+    vert_list = [x[1:] for x in vert_list]
+    tet_list = [x[1:] for x in tet_list]
+
+    return [vert_list, edge_list_from_tet_list(tet_list), face_list_from_tet_list(tet_list), tet_list]

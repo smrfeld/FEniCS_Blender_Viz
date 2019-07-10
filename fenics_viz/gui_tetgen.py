@@ -35,13 +35,10 @@ def get_fnames(extensions_required, files, directory):
 
 
 
-
-class CreateVoronoiFromDelaunay(bpy.types.Operator, ImportHelper):
+'''
+class CreateVoronoiFromDelaunay(bpy.types.Operator):
     bl_idname = "fviz.create_voronoi"
     bl_label = "Create Voronoi from TetGen Delaunay"
-
-    files = CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
-    directory = StringProperty(subtype='DIR_PATH')
 
     # Get the filename
     def execute(self, context):
@@ -64,11 +61,7 @@ class CreateVoronoiFromDelaunay(bpy.types.Operator, ImportHelper):
             make_mesh_object.make_mesh_object(name, nodes_for_each_cell[i], edges_for_each_cell[i])
 
         return {'FINISHED'}
-
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
+'''
 
 
 

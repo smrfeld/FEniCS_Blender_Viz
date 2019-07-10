@@ -72,7 +72,7 @@ class Delaunay_Obj_Import(bpy.types.Operator, ImportHelper):
 
         # Make object
         obj_name = fname_helper.get_base_name(fname_nodes)
-        make_mesh_object.make_mesh_object_with_idxs(obj_name, point_list, edge_list, face_list)
+        make_mesh_object.make_mesh_object(obj_name, point_list, edge_list, face_list)
 
         # Add to the list
         context.scene.fviz.add_delaunay_obj(obj_name, point_list, face_list, tet_list)

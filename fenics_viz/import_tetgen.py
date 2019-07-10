@@ -38,6 +38,12 @@ def import_simple(fname, length, floats=False):
     # Close
     f.close()
 
+    # Sort
+    objs.sort(key=lambda x: x[0])
+
+    # Strip idxs
+    objs = [x[1:] for x in objs]
+
     return objs
 
 
@@ -55,15 +61,13 @@ def import_tetgen_delaunay(fname_nodes, fname_edges, fname_faces, fname_elements
 
 
 
-def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells):
-
-    point_list = []
-    edge_list = []
-    face_list = []
-    cell_list = []
+def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces):
 
     # Import points (nodes)
     point_list = import_simple(fname_nodes, 3, floats=True)
+
+    edge_list = []
+    face_list = []
 
     # Import edges
     f = open(fname_edges,"r")
@@ -162,33 +166,12 @@ def import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces, fname_cells):
     # Close
     f.close()
 
-    # Import cells
-    f = open(fname_cells,"r")
-
-    line_ctr = 0
-    for line in f:
-        s = line.split()
-
-        if line_ctr == 0:
-            # Get how many elements there are
-            no_cells = int(s[0])
-
-        elif len(s) > 0 and s[0] != "#":
-            if s[-1] == "-1": # remove boundary marker
-                s = s[:-1]
-            idx = int(s[0])
-            face_idxs = [int(x) for x in s[2:]]
-            cell_list.append([idx] + face_idxs)
-
-        line_ctr += 1
-
-    # Close
-    f.close()
-
     # Sort lists
-    point_list.sort(key=lambda x: x[0])
     edge_list.sort(key=lambda x: x[0])
     face_list.sort(key=lambda x: x[0])
-    cell_list.sort(key=lambda x: x[0])
 
-    return [ point_list, edge_list, face_list, cell_list ]
+    # Strip idxs
+    edge_list = [x[1:] for x in edge_list]
+    face_list = [x[1:] for x in face_list]
+
+    return [ point_list, edge_list, face_list ]

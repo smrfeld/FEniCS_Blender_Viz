@@ -114,9 +114,11 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         col.operator("fviz.delaunay_obj_remove", icon='ZOOMOUT', text="")
         col.operator("fviz.delaunay_obj_remove_all", icon='X', text="")
 
+        '''
         row = box.row()
         row.label("Create Voronoi from TetGen Delaunay")
         row.operator("fviz.create_voronoi")
+        '''
 
         # Voronoi
 
@@ -163,18 +165,17 @@ class FVizPropGroup(bpy.types.PropertyGroup):
                 obj.vertex_subdivided_face_list.remove ( 0 )
 
         obj.name = name
-        for i in range(0,len(vert_list)):
+        for v in vert_list:
             obj.vert_list.add()
-            obj.vert_list[i].set_from_list_with_idx(vert_list[i])
+            obj.vert_list[-1].set_from_list(v)
             # Also add for subdivided faces
             obj.vertex_subdivided_face_list.add()
-            obj.vertex_subdivided_face_list[i].idx = i
-        for i in range(0,len(face_list)):
+        for f in face_list:
             obj.face_list.add()
-            obj.face_list[i].set_from_list_with_idx(face_list[i])
-        for i in range(0,len(tet_list)):
+            obj.face_list[-1].set_from_list(f)
+        for t in tet_list:
             obj.tet_list.add()
-            obj.tet_list[i].set_from_list_with_idx(tet_list[i])
+            obj.tet_list[-1].set_from_list(t)
 
     # Remove a mesh object
     def remove_xml_obj(self):
@@ -213,15 +214,15 @@ class FVizPropGroup(bpy.types.PropertyGroup):
                 obj.tet_list.remove ( 0 )
 
         obj.name = name
-        for i in range(0,len(vert_list)):
+        for v in vert_list:
             obj.vert_list.add()
-            obj.vert_list[i].set_from_list_with_idx(vert_list[i])
-        for i in range(0,len(face_list)):
+            obj.vert_list[-1].set_from_list(v)
+        for f in face_list:
             obj.face_list.add()
-            obj.face_list[i].set_from_list_with_idx(face_list[i])
-        for i in range(0,len(tet_list)):
+            obj.face_list[-1].set_from_list(f)
+        for t in tet_list:
             obj.tet_list.add()
-            obj.tet_list[i].set_from_list_with_idx(tet_list[i])
+            obj.tet_list[-1].set_from_list(t)
 
     # Remove a mesh object
     def remove_delaunay_obj(self):
@@ -260,15 +261,15 @@ class FVizPropGroup(bpy.types.PropertyGroup):
                 obj.cell_list.remove ( 0 )
 
         obj.name = name
-        for i in range(0,len(vert_list)):
+        for v in vert_list:
             obj.vert_list.add()
-            obj.vert_list[i].set_from_list_with_idx(vert_list[i])
-        for i in range(0,len(face_list)):
+            obj.vert_list[-1].set_from_list(v)
+        for f in face_list:
             obj.face_list.add()
-            obj.face_list[i].set_from_list_with_idx(face_list[i])
-        for i in range(0,len(cell_list)):
+            obj.face_list[-1].set_from_list(f)
+        for c in cell_list:
             obj.cell_list.add()
-            obj.cell_list[i].set_from_list_with_idx(cell_list[i])
+            obj.cell_list[-1].set_from_list(c)
 
     # Remove a mesh object
     def remove_voronoi_obj(self):

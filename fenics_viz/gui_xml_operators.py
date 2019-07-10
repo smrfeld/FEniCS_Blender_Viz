@@ -9,6 +9,7 @@ from . import make_subdivided_triangles
 from . import import_xml_mesh_values
 from . import make_materials_for_subdivided_mesh
 from . import color_subdivided_mesh
+from . import make_mesh_object
 
 # Subdivide faces
 class XML_Obj_SubdivideFaces(bpy.types.Operator):
@@ -34,8 +35,8 @@ class XML_Obj_SubdivideFaces(bpy.types.Operator):
         # Store face idxs on the verts, so can change material color for animation!
 
         # Clear first
-        for v in obj.vert_list:
-            obj.vertex_subdivided_face_list[v.index].faces = ""
+        for v_idx in range(0,len(obj.vert_list)):
+            obj.vertex_subdivided_face_list[v_idx].faces = ""
 
         # Write in space deliminited format, for some stupid reason
         # Related to collection of collections not working
@@ -43,16 +44,15 @@ class XML_Obj_SubdivideFaces(bpy.types.Operator):
         for i_face in range(0,len(face_list_s)):
             for v_idx in face_list_s[i_face]:
                 if v_idx < idx_max: # Other vertices are new ones; we only care about the existing
-                    v = obj.vert_list[v_idx]
-                    if obj.vertex_subdivided_face_list[v.index].faces == "":
-                        obj.vertex_subdivided_face_list[v.index].faces = str(i_face)
+                    if obj.vertex_subdivided_face_list[v_idx].faces == "":
+                        obj.vertex_subdivided_face_list[v_idx].faces = str(i_face)
                     else:
-                        obj.vertex_subdivided_face_list[v.index].faces += " " + str(i_face)
+                        obj.vertex_subdivided_face_list[v_idx].faces += " " + str(i_face)
                     # No more will come for this face
                     break
 
         # Add materials
-        vert_face_strings = [obj.vertex_subdivided_face_list[v.index].faces for v in obj.vert_list]
+        vert_face_strings = [s.faces for s in obj.vertex_subdivided_face_list]
         make_materials_for_subdivided_mesh.make_materials_for_subdivided_mesh(context, new_obj, vert_face_strings)
 
         return {"FINISHED"}
