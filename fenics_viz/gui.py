@@ -133,6 +133,15 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         col.operator("fviz.voronoi_obj_remove", icon='ZOOMOUT', text="")
         col.operator("fviz.voronoi_obj_remove_all", icon='X', text="")
 
+        row = box.row()
+        row.label("Draw type")
+        row.operator("fviz.voronoi_obj_draw_switch")
+
+        row = box.row()
+        row.label("Triangulate all objects")
+        row.operator("fviz.voronoi_obj_triangulate_all")
+
+
     # Add a mesh object to the list
     def add_xml_obj(self, name, vert_list, face_list, tet_list):
         print("Adding XML object to the list")
