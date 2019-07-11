@@ -2,7 +2,7 @@ import bpy
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
-from bpy_extras.io_utils import ImportHelper
+from bpy_extras.io_utils import ExportHelper
 
 class Voronoi_Obj_DrawSwitch(bpy.types.Operator):
     bl_idname = "fviz.voronoi_obj_draw_switch"
@@ -34,6 +34,11 @@ class Voronoi_Obj_Triangulate_All(bpy.types.Operator):
     # Get the filename
     def execute(self, context):
 
+        # Deselect all objects
+        bpy.context.scene.objects.active = None
+        for obj in bpy.data.objects:
+            obj.select = False
+
         # Iterate over all objects
         f = context.scene.fviz
         for obj in f.voronoi_obj_list:
@@ -61,3 +66,47 @@ class Voronoi_Obj_Triangulate_All(bpy.types.Operator):
             obj_blender.select = False
 
         return {'FINISHED'}
+
+class Voronoi_Obj_Export_To_PLY(bpy.types.Operator):
+    bl_idname = "fviz.voronoi_obj_export_ply"
+    bl_label = "Export Voronoi objects to PLY"
+
+    directory = StringProperty(name="directory path") # subtype='DIR_PATH'
+
+    # Get the filename
+    def execute(self, context):
+
+        # Deselect all objects
+        bpy.context.scene.objects.active = None
+        for obj in bpy.data.objects:
+            obj.select = False
+
+        # Go through all objects
+        f = context.scene.fviz
+        for obj in f.voronoi_obj_list:
+
+            # Get the blender obj
+            obj_blender = bpy.data.objects[obj.name]
+
+            # Select object
+            obj_blender.select = True
+            context.scene.objects.active = obj_blender
+
+            # File path
+            fpath = self.directory
+            if fpath[-1] != "/":
+                fpath += "/"
+            fpath += obj.name
+            fpath += ".ply"
+
+            # Export
+            bpy.ops.export_mesh.ply("EXEC_DEFAULT",filepath=fpath)
+
+            # Deseelct object
+            obj_blender.select = False
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}

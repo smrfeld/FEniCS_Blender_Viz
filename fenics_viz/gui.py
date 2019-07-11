@@ -141,6 +141,9 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         row.label("Triangulate all objects")
         row.operator("fviz.voronoi_obj_triangulate_all")
 
+        row = box.row()
+        row.label("Export all objects to PLY")
+        row.operator("fviz.voronoi_obj_export_ply")
 
     # Add a mesh object to the list
     def add_xml_obj(self, name, vert_list, face_list, tet_list):
