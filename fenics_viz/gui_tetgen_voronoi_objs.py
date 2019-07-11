@@ -8,7 +8,7 @@ from . import gui_common_objs
 from . import fname_helper
 from . import import_tetgen
 from . import make_mesh_object
-from . import fix_tetgen_voronoi
+from . import voronoi_from_delaunay
 
 # Class to hold the object
 class Voronoi_Obj_Mesh(bpy.types.PropertyGroup):
@@ -65,31 +65,32 @@ class Voronoi_Obj_Import(bpy.types.Operator, ImportHelper):
     # Get the filename
     def execute(self, context):
 
-        # Get the active delaunay object
+        # Get current object
         f = context.scene.fviz
         if len(f.delaunay_obj_list) == 0:
             raise SystemError("Must have already imported and selected Delaunay mesh!")
-        delaunay_obj = f.delaunay_obj_list[f.active_delaunay_obj_idx]
+        obj = f.delaunay_obj_list[f.active_delaunay_obj_idx]
 
-        # Get the selected filenames
-        extensions_required = [".node", ".edge", ".face"]
-        fname_nodes, fname_edges, fname_faces = fname_helper.get_fnames(extensions_required, self.files, self.directory)
+        # Import neighbors
+        extensions_required = [".neigh"]
+        fname_neighs = fname_helper.get_fnames(extensions_required, self.files, self.directory)[0]
+        neigh_list = import_tetgen.import_tetgen_delaunay_neighbors(fname_neighs)
 
-        # Import
-        no_points_interior, vert_list, edge_list, face_list = import_tetgen.import_tetgen_voronoi(fname_nodes, fname_edges, fname_faces)
+        # Create voronoi
+        delaunay_vert_list = [v.get_list() for v in obj.vert_list]
+        delaunay_edge_list = [e.get_list() for e in obj.edge_list]
+        delaunay_tet_list = [t.get_list() for t in obj.tet_list]
 
-        # Get voronoi cells - there is a bug in tetgen 1.5.1 that does not generate these correctly
-        delaunay_vert_list = [v.get_list() for v in delaunay_obj.vert_list]
-        delaunay_edge_list = [e.get_list() for e in delaunay_obj.edge_list]
-        delaunay_tet_list = [t.get_list() for t in delaunay_obj.tet_list]
-        cell_list = fix_tetgen_voronoi.make_cell_list(no_points_interior, vert_list, face_list, delaunay_vert_list, delaunay_edge_list, delaunay_tet_list)
+        verts_for_each_cell, faces_for_each_cell = voronoi_from_delaunay.voronoi_from_delaunay(delaunay_vert_list, delaunay_edge_list, delaunay_tet_list, neigh_list)
 
-        # Make object
-        obj_name = fname_helper.get_base_name(fname_nodes)
-        make_mesh_object.make_mesh_object(obj_name, vert_list, edge_list, face_list)
+        # Make objects
+        for i in range(0,len(verts_for_each_cell)):
+            obj_name = "voronoi_%04i" % i
+            make_mesh_object.make_mesh_object(obj_name, vert_list=verts_for_each_cell[i], edge_list=[], face_list=faces_for_each_cell[i])
 
-        # Add to the list
-        context.scene.fviz.add_voronoi_obj(obj_name, vert_list, face_list, cell_list)
+            # Add to the list
+            cell_list = [list(range(0,len(faces_for_each_cell[i])))]
+            context.scene.fviz.add_voronoi_obj(obj_name, verts_for_each_cell[i], faces_for_each_cell[i], cell_list)
 
         return {'FINISHED'}
 
