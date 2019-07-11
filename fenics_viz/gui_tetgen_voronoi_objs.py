@@ -81,12 +81,12 @@ class Voronoi_Obj_Import(bpy.types.Operator, ImportHelper):
         delaunay_edge_list = [e.get_list() for e in obj.edge_list]
         delaunay_tet_list = [t.get_list() for t in obj.tet_list]
 
-        verts_for_each_cell, faces_for_each_cell = voronoi_from_delaunay.voronoi_from_delaunay(delaunay_vert_list, delaunay_edge_list, delaunay_tet_list, neigh_list)
+        verts_for_each_cell, edges_for_each_cell, faces_for_each_cell = voronoi_from_delaunay.voronoi_from_delaunay(delaunay_vert_list, delaunay_edge_list, delaunay_tet_list, neigh_list)
 
         # Make objects
         for i in range(0,len(verts_for_each_cell)):
             obj_name = "voronoi_%04i" % i
-            make_mesh_object.make_mesh_object(obj_name, vert_list=verts_for_each_cell[i], edge_list=[], face_list=faces_for_each_cell[i])
+            make_mesh_object.make_mesh_object(obj_name, vert_list=verts_for_each_cell[i], edge_list=edges_for_each_cell[i], face_list=faces_for_each_cell[i])
 
             # Add to the list
             cell_list = [list(range(0,len(faces_for_each_cell[i])))]

@@ -188,9 +188,11 @@ def voronoi_from_delaunay(vert_list, edge_list, tet_list, tet_neighbors):
         pts = [vert_list[v] for v in tet]
         circumcenters.append(circumcenter_sphere.circumcenter_sphere_from_pt_list(pts))
 
-    # Go through all verts; each gets a cell
     faces_for_each_cell = []
     verts_for_each_cell = []
+    edges_for_each_cell = []
+
+    # Go through all verts; each gets a cell
     for i_vert in range(0,len(vert_list)):
 
         # print("Doing vert: " + str(i_vert) + " / " + str(len(vert_list)))
@@ -298,4 +300,22 @@ def voronoi_from_delaunay(vert_list, edge_list, tet_list, tet_neighbors):
                     # Back to the beginning; stop
                     break
 
-    return [ verts_for_each_cell, faces_for_each_cell ]
+        # Remove any faces that only have 2 verts (why does this happen?)
+        faces_for_each_cell[-1] = [face for face in faces_for_each_cell[-1] if len(face) >= 3]
+
+        # Make edge list
+        edges_for_each_cell.append([])
+
+        # Go through all faces
+        for face in faces_for_each_cell[-1]:
+            e01 = sorted([face[0], face[1]])
+            e02 = sorted([face[0], face[2]])
+            e12 = sorted([face[1], face[2]])
+            if not e01 in edges_for_each_cell[-1]:
+                edges_for_each_cell[-1].append(e01)
+            if not e02 in edges_for_each_cell[-1]:
+                edges_for_each_cell[-1].append(e02)
+            if not e12 in edges_for_each_cell[-1]:
+                edges_for_each_cell[-1].append(e12)
+
+    return [ verts_for_each_cell, edges_for_each_cell, faces_for_each_cell ]
