@@ -41,18 +41,10 @@ if "bpy" in locals():
     print("Reloading FenICS viz")
     import imp
     imp.reload(gui)
-    imp.reload(import_xml_mesh)
-    imp.reload(import_xml_mesh_values)
-    imp.reload(make_mesh_object)
-    imp.reload(make_subdivided_triangles)
 
 else:
     print("Importing FenICS viz")
     from . import gui
-    from . import import_xml_mesh
-    from . import import_xml_mesh_values
-    from . import make_mesh_object
-    from . import make_subdivided_triangles
 
 # General import
 import bpy

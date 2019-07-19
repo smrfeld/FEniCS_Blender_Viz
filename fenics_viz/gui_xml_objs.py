@@ -82,11 +82,6 @@ class XML_Obj_Import(bpy.types.Operator, ImportHelper):
             # Import
             vert_list, edge_list, face_list, tet_list = import_xml_mesh.import_xml_mesh(self.properties.filepath)
 
-            print(vert_list)
-            print(edge_list)
-            print(face_list)
-            print(tet_list)
-
             # Make the objects
             make_mesh_object.make_mesh_object(filename, vert_list, edge_list, face_list)
 
