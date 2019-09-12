@@ -6,8 +6,8 @@ Created on July 5 00:00:00 2019
 """
 
 bl_info = {
-    "name": "DOLFIN/FenICS viz",
-    "description": "Simple viz for XML files from DOLFIN/FenICS in Blender",
+    "name": "FenICS viz",
+    "description": "Simple viz for XML files from FenICS in Blender",
     "author": "Oliver K. Ernst",
     "version": (0,1,0),
     "blender": (2, 7, 8),

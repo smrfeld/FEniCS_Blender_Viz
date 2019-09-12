@@ -1,6 +1,6 @@
 import bpy, bmesh
 
-def make_mesh_object(obj_name, vert_list, edge_list=[], face_list=[]):
+def make_mesh_object(obj_name, vert_list, edge_list, face_list):
 
     # New object
     mesh_new = bpy.data.meshes.new(obj_name)
