@@ -25,10 +25,10 @@ class Tet(bpy.types.PropertyGroup):
 
     # Vals for linear interpolation
     # a*x + b*y + c*z + d
-    valA = FloatProperty( default = 0.0, name="colA" )
-    valB = FloatProperty( default = 0.0, name="colB" )
-    valC = FloatProperty( default = 0.0, name="colC" )
-    valD = FloatProperty( default = 0.0, name="colD" )
+    colA = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="colA" )
+    colB = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="colB" )
+    colC = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="colC" )
+    colD = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="colD" )
 
 class Mesh(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
@@ -40,26 +40,38 @@ class Mesh(bpy.types.PropertyGroup):
         col = row.column()
         col.label ( str(self.name) )
 
-    def recalculate_basis(self):
+    def recalculate_basis(self, minVal, maxVal, minColor, maxColor):
 
         # Do it for every tet
         for tet in self.tet_list:
 
+            # Verts
             v0 = self.vert_list[tet.v0]
             v1 = self.vert_list[tet.v1]
             v2 = self.vert_list[tet.v2]
             v3 = self.vert_list[tet.v3]
 
+            # Convert values to fracs
+            fracs = [ (v0.value - minVal) / (maxVal - minVal),
+                (v1.value - minVal) / (maxVal - minVal),
+                (v2.value - minVal) / (maxVal - minVal),
+                (v3.value - minVal) / (maxVal - minVal) ]
+
+            # Convert fracs to colors in each channel
+            # 4 x 3
+            cols = [ [ minColor[icol] + fracs[iv] * (maxColor[icol] - minColor[icol]) for icol in range(0,3) ] for iv in range(0,4) ]
+
             # colFunc takes input a value (float) and outputs a color (tuple of R,G,B)
+            # 4 x 4
             m = np.array([
                 [v0.xval,v0.yval,v0.zval,1.0],
                 [v1.xval,v1.yval,v1.zval,1.0],
                 [v2.xval,v2.yval,v2.zval,1.0],
                 [v3.xval,v3.yval,v3.zval,1.0]])
             minv = inv(m)
-            vals = np.array([v0.value,v1.value,v2.value,v3.value])
-            valsCoeffs = np.dot(minv, vals)
-            tet.valA = valsCoeffs[0]
-            tet.valB = valsCoeffs[1]
-            tet.valC = valsCoeffs[2]
-            tet.valD = valsCoeffs[3]
+            colscoeffs = np.dot(minv, np.array(cols))
+            # Result us 4 x 3
+            tet.colA = colscoeffs[0]
+            tet.colB = colscoeffs[1]
+            tet.colC = colscoeffs[2]
+            tet.colD = colscoeffs[3]

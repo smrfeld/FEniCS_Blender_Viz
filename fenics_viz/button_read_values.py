@@ -60,8 +60,33 @@ class Obj_Import_Values(bpy.types.Operator, ImportHelper):
                 # Set the value
                 vert_obj.value = value
 
+            minVal = -2.0
+            maxVal = 25.0
+            minColor = (0.0, 0.0, 1.0)
+            maxColor = (1.0, 0.0, 0.0)
+
             # Recalculate all the bases
-            mesh_obj.recalculate_basis()
+            mesh_obj.recalculate_basis(minVal, maxVal, minColor, maxColor)
+
+            # Almost done!
+            # Now we just have to get the values from the tets into the script, then we can render!!! :)
+            # Iterate over all tets
+            for tet_obj in mesh_obj.tet_list:
+
+                # Get the blender object
+                obj = bpy.data.objects[tet_obj.name]
+
+                # Material
+                mat = obj.active_material
+
+                # Script node
+                script_node = mat.node_tree.nodes['Script']
+
+                # Script node inputs
+                script_node.inputs[0].default_value = tet_obj.colA
+                script_node.inputs[1].default_value = tet_obj.colB
+                script_node.inputs[2].default_value = tet_obj.colC
+                script_node.inputs[3].default_value = tet_obj.colD
 
         return {'FINISHED'}
 
