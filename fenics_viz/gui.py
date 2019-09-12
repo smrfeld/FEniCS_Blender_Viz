@@ -8,6 +8,7 @@ import mathutils
 from . import objs
 from . import obj_buttons
 from . import button_read_values
+from . import button_setup_materials
 
 # Register
 def register():
@@ -72,6 +73,10 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         row = box.row()
         row.label("Read values")
         row.operator("fviz.read_values")
+
+        row = box.row()
+        row.label("Setup materials")
+        row.operator("fviz.setup_materials")
 
     # Add a mesh object to the list
     def add_obj(self, name, vert_list, tet_list):
