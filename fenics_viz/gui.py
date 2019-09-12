@@ -86,6 +86,9 @@ class FVizPropGroup(bpy.types.PropertyGroup):
             while len(obj.tet_list) > 0:
                 obj.tet_list.remove ( 0 )
 
+        # Dict from vert (global idx) to list of [tuples of (tet (global idx), vert (local idx))]
+        vert_to_tet_local_dict = {}
+
         # Go through tets
         for tet_idx, tet in enumerate(tet_list):
             tet_name = name + "_%05d" % tet_idx
@@ -102,6 +105,41 @@ class FVizPropGroup(bpy.types.PropertyGroup):
             tet_obj.v2 = verts[2]
             tet_obj.v3 = verts[3]
 
+            # vert_to_tet_local_dict
+            for v_local, v_global in enumerate(verts):
+                if not v_global in vert_to_tet_local_dict:
+                    vert_to_tet_local_dict[v_global] = []
+                vert_to_tet_local_dict[v_global].append((tet_idx, v_local))
+
+        # Link equivalent verts
+        # Run through all verts
+        for v_global, tet_local_pairs in vert_to_tet_local_dict.items():
+
+            # Go through all tet/vert pairs
+            for idx_this_pair, tet_local_pair in enumerate(tet_local_pairs):
+                tet_idx = tet_local_pair[0]
+                v_local = tet_local_pair[1]
+
+                # Get the tet object
+                tet_obj = obj.tet_list[tet_idx]
+
+                # Run through all other tet/vert pairs in the list, EXCLUDING this one!
+                for idx_other_pair, tet_local_other_pair in enumerate(tet_local_pairs):
+                    if idx_this_pair == idx_other_pair:
+                        continue # skip!
+
+                    # Add as equivalent
+                    if v_local == 0:
+                        equiv = tet_obj.v0_equivalents.add()
+                    elif v_local == 1:
+                        equiv = tet_obj.v1_equivalents.add()
+                    elif v_local == 2:
+                        equiv = tet_obj.v2_equivalents.add()
+                    elif v_local == 3:
+                        equiv = tet_obj.v3_equivalents.add()
+
+                    equiv.tet_idx = tet_local_other_pair[0]
+                    equiv.vert_idx = tet_local_other_pair[1]
 
 
     # Remove a mesh object

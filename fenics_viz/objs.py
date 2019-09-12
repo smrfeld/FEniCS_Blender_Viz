@@ -7,6 +7,10 @@ from bpy_extras.io_utils import ImportHelper
 import numpy as np
 from numpy.linalg import inv
 
+class EquivalentTetVert(bpy.types.PropertyGroup):
+    tet_idx = IntProperty( default = 0, name="tet_idx" )
+    vert_idx = IntProperty( default = 0, name="vert_idx")
+
 class Tet(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     idx = IntProperty(default = 0, name="idx")
@@ -28,6 +32,12 @@ class Tet(bpy.types.PropertyGroup):
     valC = FloatProperty( default = 0.0, name="colC" )
     valD = FloatProperty( default = 0.0, name="colD" )
 
+    # Equivalent tet/vert to vertex..
+    v0_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 0")
+    v1_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 1")
+    v2_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 2")
+    v3_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 3")
+
     def refreshCols(self, colFunc):
         # colFunc takes input a value (float) and outputs a color (tuple of R,G,B)
         m = np.array([
@@ -46,3 +56,8 @@ class Tet(bpy.types.PropertyGroup):
 class Mesh(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     tet_list = CollectionProperty(type=Tet, name = "Tet list")
+
+    # Draw in list of objects
+    def draw_item_in_row ( self, row ):
+        col = row.column()
+        col.label ( str(self.name) )
