@@ -7,23 +7,21 @@ from bpy_extras.io_utils import ImportHelper
 import numpy as np
 from numpy.linalg import inv
 
-class EquivalentTetVert(bpy.types.PropertyGroup):
-    tet_idx = IntProperty( default = 0, name="tet_idx" )
-    vert_idx = IntProperty( default = 0, name="vert_idx")
+class Vertex(bpy.types.PropertyGroup):
+    idx = IntProperty( default=0, name="idx")
+    xval = FloatProperty( default= 0.0, precision=8, name="x" )
+    yval = FloatProperty( default= 0.0, precision=8, name="y" )
+    zval = FloatProperty( default= 0.0, precision=8, name="z" )
+    value = FloatProperty( default = 0.0, name="value" )
 
 class Tet(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     idx = IntProperty(default = 0, name="idx")
 
-    v0 = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="v0" )
-    v1 = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="v1" )
-    v2 = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="v2" )
-    v3 = FloatVectorProperty( default = (0.0, 0.0, 0.0), name="v3" )
-
-    val0 = FloatProperty( default = 0.0, name="val0" )
-    val1 = FloatProperty( default = 0.0, name="val1" )
-    val2 = FloatProperty( default = 0.0, name="val2" )
-    val3 = FloatProperty( default = 0.0, name="val3" )
+    v0 = IntProperty( default = 0, name="v0" )
+    v1 = IntProperty( default = 0, name="v1" )
+    v2 = IntProperty( default = 0, name="v2" )
+    v3 = IntProperty( default = 0, name="v3" )
 
     # Vals for linear interpolation
     # a*x + b*y + c*z + d
@@ -32,32 +30,36 @@ class Tet(bpy.types.PropertyGroup):
     valC = FloatProperty( default = 0.0, name="colC" )
     valD = FloatProperty( default = 0.0, name="colD" )
 
-    # Equivalent tet/vert to vertex..
-    v0_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 0")
-    v1_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 1")
-    v2_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 2")
-    v3_equivalents = CollectionProperty(type=EquivalentTetVert, name="Equivalent verts for vert 3")
-
-    def refreshCols(self, colFunc):
-        # colFunc takes input a value (float) and outputs a color (tuple of R,G,B)
-        m = np.array([
-            [self.v0.x,self.v0.y,self.v0.z,1.0],
-            [self.v1.x,self.v1.y,self.v1.z,1.0],
-            [self.v2.x,self.v2.y,self.v2.z,1.0],
-            [self.v3.x,self.v3.y,self.v3.z,1.0]])
-        minv = inv(m)
-        vals = np.array([self.val0,self.val1,self.val2,self.val3])
-        valsCoeffs = minv.vals
-        self.valA = valsCoeffs[0]
-        self.valB = valsCoeffs[1]
-        self.valC = valsCoeffs[2]
-        self.valD = valsCoeffs[3]
-
 class Mesh(bpy.types.PropertyGroup):
     name = StringProperty ( name="Name", default="", description="Object Name" )
     tet_list = CollectionProperty(type=Tet, name = "Tet list")
+    vert_list = CollectionProperty(type=Vertex, name= "Vert list")
 
     # Draw in list of objects
     def draw_item_in_row ( self, row ):
         col = row.column()
         col.label ( str(self.name) )
+
+    def recalculate_basis(self):
+
+        # Do it for every tet
+        for tet in self.tet_list:
+
+            v0 = self.vert_list[tet.v0]
+            v1 = self.vert_list[tet.v1]
+            v2 = self.vert_list[tet.v2]
+            v3 = self.vert_list[tet.v3]
+
+            # colFunc takes input a value (float) and outputs a color (tuple of R,G,B)
+            m = np.array([
+                [v0.xval,v0.yval,v0.zval,1.0],
+                [v1.xval,v1.yval,v1.zval,1.0],
+                [v2.xval,v2.yval,v2.zval,1.0],
+                [v3.xval,v3.yval,v3.zval,1.0]])
+            minv = inv(m)
+            vals = np.array([v0.value,v1.value,v2.value,v3.value])
+            valsCoeffs = np.dot(minv, vals)
+            tet.valA = valsCoeffs[0]
+            tet.valB = valsCoeffs[1]
+            tet.valC = valsCoeffs[2]
+            tet.valD = valsCoeffs[3]

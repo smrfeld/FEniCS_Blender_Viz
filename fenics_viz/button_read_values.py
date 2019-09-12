@@ -5,7 +5,6 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
 from bpy_extras.io_utils import ImportHelper
 
 import os
-from . import make_mesh_object
 from . import objs
 from . import import_xml_mesh_values
 
@@ -15,7 +14,7 @@ from . import import_xml_mesh_values
 
 # Import mesh
 class Obj_Import_Values(bpy.types.Operator, ImportHelper):
-    bl_idname = "fviz.obj_import_values"
+    bl_idname = "fviz.read_values"
     bl_label = "Import XML Object Values"
 
     filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
@@ -35,27 +34,34 @@ class Obj_Import_Values(bpy.types.Operator, ImportHelper):
             # Import
             vals = import_xml_mesh_values.import_xml_mesh_values(self.properties.filepath)
 
-            
+            # Go through all vals
+            mesh_obj = context.scene.fviz.obj_list[context.scene.fviz.active_obj_idx]
+            for val in vals:
+                tet_idx = val[0]
+                vert_idx = val[1]
+                value = val[2]
 
-            # Run through all tets
-            for tet_idx, tet in enumerate(tet_list):
+                # Get the tet object
+                tet_obj = mesh_obj.tet_list[tet_idx]
 
-                name = filename + "_%05d" % tet_idx
+                # Set the value
+                if vert_idx == 0:
+                    vert_global = tet_obj.v0
+                elif vert_idx == 1:
+                    vert_global = tet_obj.v1
+                elif vert_idx == 2:
+                    vert_global = tet_obj.v2
+                elif vert_idx == 3:
+                    vert_global = tet_obj.v3
 
-                # Get the verts
-                verts = [ vert_list[tet[i]] for i in range(0,4) ]
+                # Get the vert
+                vert_obj = mesh_obj.vert_list[vert_global]
 
-                # Get the edges
-                edges = [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]]
+                # Set the value
+                vert_obj.value = value
 
-                # Get the faces
-                faces = [[0,1,2],[0,1,3],[0,2,3],[1,2,3]]
-
-                # Make the object in blender
-                make_mesh_object.make_mesh_object(name, verts, edges, faces)
-
-            # Add to the list
-            context.scene.fviz.add_obj(filename, vert_list, tet_list)
+            # Recalculate all the bases
+            mesh_obj.recalculate_basis()
 
         return {'FINISHED'}
 
