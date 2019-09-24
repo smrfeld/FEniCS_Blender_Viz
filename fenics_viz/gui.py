@@ -71,12 +71,20 @@ class FVizPropGroup(bpy.types.PropertyGroup):
         col.operator("fviz.obj_remove_all", icon='X', text="")
 
         row = box.row()
+        row.label("Setup materials")
+        row.operator("fviz.setup_materials")
+
+        row = box.row()
         row.label("Read values")
         row.operator("fviz.read_values")
 
         row = box.row()
-        row.label("Setup materials")
-        row.operator("fviz.setup_materials")
+        row.label("Setup surface materials")
+        row.operator("fviz.setup_materials_surf")
+
+        row = box.row()
+        row.label("Read values surface")
+        row.operator("fviz.read_values_surf")
 
     # Add a mesh object to the list
     def add_obj(self, name, vert_list, tet_list):
